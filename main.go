@@ -18,7 +18,5 @@ func main() {
 	log.Print("Open ports: ", openPorts)
 
 	log.Println("Checking for open relay")
-	for _, port := range openPorts {
-		println(targetHost + ":" + string(port))
-	}
+	openRelay(targetHost)
 }
