@@ -1,1 +1,20 @@
 # mxcheck
+
+mxcheck checks dns records and relaying settings of mail servers.
+
+# Version
+
+1.0.0-BETA
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/steffenfritz/mxcheck)](https://goreportcard.com/report/github.com/steffenfritz/mxcheck)
+
+
+
+
+# Installation
+
+    go get github.com/steffenfritz/mxcheck
+
+# Usage Example
+
+    ./mxcheck -targetHost 2600.com
