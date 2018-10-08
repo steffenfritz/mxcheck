@@ -8,7 +8,7 @@ mxcheck checks dns records and relaying settings of mail servers.
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/steffenfritz/mxcheck)](https://goreportcard.com/report/github.com/steffenfritz/mxcheck)
 
-
+[![Build Status](https://travis-ci.org/steffenfritz/mxcheck.svg?branch=master)](https://travis-ci.org/steffenfritz/mxcheck)
 
 
 # Installation
