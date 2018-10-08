@@ -20,9 +20,17 @@ func main() {
 
 	log.Println("Checking for A record")
 	ipaddr := getA(targetHost)
+	log.Println("IP address MX: " + ipaddr)
 
 	log.Println("Checking for PTR record")
-	log.Println(getPTR(ipaddr))
+	ptrentry := getPTR(ipaddr)
+	log.Println("PTR entry: " + ptrentry)
+
+	if ptrentry == targetHost {
+		log.Println("PTR matches MX record")
+	} else {
+		log.Println("PTR does not match MX record")
+	}
 
 	log.Println("Checking for open mail ports")
 	openPorts := portScan(targetHost)

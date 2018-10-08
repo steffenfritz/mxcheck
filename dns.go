@@ -1,6 +1,10 @@
 package main
 
-import "github.com/miekg/dns"
+import (
+	"strings"
+
+	"github.com/miekg/dns"
+)
 
 func getMX(targetHostName *string) (string, bool) {
 	var mx string
@@ -45,8 +49,13 @@ func getA(targetHostName string) string {
 func getPTR(ipaddr string) string {
 	var ptr string
 
+	ipslice := strings.Split(ipaddr, ".")
+	rddapi := ipslice[3] + "." + ipslice[2] + "." + ipslice[1] + "." + ipslice[0]
+
+	rddapi = rddapi + ".in-addr.arpa"
+
 	m := new(dns.Msg)
-	m.SetQuestion(ipaddr, dns.TypePTR)
+	m.SetQuestion(dns.Fqdn(rddapi), dns.TypePTR)
 
 	c := new(dns.Client)
 	in, _, err := c.Exchange(m, "8.8.8.8:53")
