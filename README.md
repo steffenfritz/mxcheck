@@ -6,9 +6,7 @@ mxcheck checks dns records for mail servers and for open relays.
 
 1.0.0-BETA
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/steffenfritz/mxcheck)](https://goreportcard.com/report/github.com/steffenfritz/mxcheck)
-
-[![Build Status](https://travis-ci.org/steffenfritz/mxcheck.svg?branch=master)](https://travis-ci.org/steffenfritz/mxcheck)
+[![Go Report Card](https://goreportcard.com/badge/github.com/steffenfritz/mxcheck)](https://goreportcard.com/report/github.com/steffenfritz/mxcheck) [![Build Status](https://travis-ci.org/steffenfritz/mxcheck.svg?branch=master)](https://travis-ci.org/steffenfritz/mxcheck)
 
 
 # Installation
