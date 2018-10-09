@@ -1,6 +1,6 @@
 # mxcheck
 
-mxcheck checks dns records and relaying settings of mail servers.
+mxcheck checks dns records for mail servers and for open relays.
 
 # Version
 
