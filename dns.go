@@ -70,3 +70,24 @@ func getPTR(ipaddr string) string {
 	}
 	return ptr
 }
+
+func getSPF(targetHostName string) string {
+	var spf string
+
+	m := new(dns.Msg)
+	m.SetQuestion(dns.Fqdn(targetHostName), dns.TypeSPF)
+
+	c := new(dns.Client)
+	in, _, err := c.Exchange(m, "8.8.8.8:53")
+	e(err)
+
+	if len(in.Answer) == 0 {
+		spf = "-- No SPF entry set"
+	} else {
+		if t, ok := in.Answer[0].(*dns.SPF); ok {
+			spf = "++ " + t.Txt[0]
+		}
+	}
+
+	return spf
+}

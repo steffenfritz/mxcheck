@@ -7,43 +7,49 @@ import (
 
 func main() {
 
-	targetHostName := flag.String("targetHost", "localhost", "The target host to check")
+	log.Println(versionmsg)
+
+	targetHostName := flag.String("t", "localhost", "The target host to check")
 	flag.Parse()
-	log.Println("Checking: " + *targetHostName)
+	log.Println("ii Checking: " + *targetHostName)
 
 	targetHost, mxstatus := getMX(targetHostName)
 	if mxstatus {
-		log.Println("Found MX: " + targetHost)
+		log.Println("ii Found MX: " + targetHost)
 	} else {
-		log.Println("No MX entry found. Using Target Host Name.")
+		log.Println("-- No MX entry found. Using Target Host Name.")
 	}
 
-	log.Println("Checking for A record")
+	log.Println("ii Checking for A record")
 	ipaddr := getA(targetHost)
-	log.Println("IP address MX: " + ipaddr)
+	log.Println("ii IP address MX: " + ipaddr)
 
-	log.Println("Checking for PTR record")
+	log.Println("ii Checking for PTR record")
 	ptrentry := getPTR(ipaddr)
-	log.Println("PTR entry: " + ptrentry)
+	log.Println("ii PTR entry: " + ptrentry)
 
 	if ptrentry == targetHost {
-		log.Println("PTR matches MX record")
+		log.Println("++ PTR matches MX record")
 	} else {
-		log.Println("PTR does not match MX record")
+		log.Println("-- PTR does not match MX record")
 	}
 
-	log.Println("Checking for open mail ports")
+	log.Println("ii Checking for SPF record")
+	spfentry := getSPF(*targetHostName)
+	log.Println(spfentry)
+
+	log.Println("ii Checking for open mail ports")
 	openPorts := portScan(targetHost)
-	log.Print("Open ports: ", openPorts)
+	log.Print("ii Open ports: ", openPorts)
 
 	if len(openPorts) == 0 {
-		log.Println("No open ports to connect to. Quitting.")
+		log.Println("ii No open ports to connect to. Quitting.")
 		return
 	}
 
 	for _, port := range openPorts {
 		if port == "25" {
-			log.Println("Checking for open relay")
+			log.Println("ii Checking for open relay")
 			openRelay(targetHost)
 		}
 	}
