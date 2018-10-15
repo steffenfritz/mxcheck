@@ -7,7 +7,8 @@ import (
 
 func main() {
 
-	log.Println(versionmsg)
+	println("\n")
+	println(versionmsg)
 
 	targetHostName := flag.String("t", "localhost", "The target host to check")
 	flag.Parse()

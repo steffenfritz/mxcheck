@@ -75,7 +75,7 @@ func getSPF(targetHostName string) string {
 	var spf string
 
 	m := new(dns.Msg)
-	m.SetQuestion(dns.Fqdn(targetHostName), dns.TypeSPF)
+	m.SetQuestion(dns.Fqdn(targetHostName), dns.TypeTXT)
 
 	c := new(dns.Client)
 	in, _, err := c.Exchange(m, "8.8.8.8:53")
@@ -84,6 +84,7 @@ func getSPF(targetHostName string) string {
 	if len(in.Answer) == 0 {
 		spf = "-- No SPF entry set"
 	} else {
+		//if t, ok := in.Answer[0].(*dns.SPF); ok {
 		if t, ok := in.Answer[0].(*dns.SPF); ok {
 			spf = "++ " + t.Txt[0]
 		}
