@@ -25,6 +25,7 @@ func getMX(targetHostName *string) (string, bool) {
 			mxstatus = true
 		}
 	}
+
 	return mx, mxstatus
 
 }
@@ -68,6 +69,7 @@ func getPTR(ipaddr string) string {
 			ptr = t.Ptr
 		}
 	}
+
 	return ptr
 }
 
@@ -92,5 +94,6 @@ func getSPF(targetHostName string) string {
 			}
 		}
 	}
+
 	return spf
 }
