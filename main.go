@@ -7,7 +7,7 @@ import (
 
 func main() {
 
-	println("\n")
+	println()
 	println(versionmsg)
 
 	targetHostName := flag.String("t", "localhost", "The target host to check")
@@ -51,7 +51,11 @@ func main() {
 	for _, port := range openPorts {
 		if port == "25" {
 			log.Println("ii Checking for open relay")
-			openRelay(targetHost)
+			tlsresult, orresult := openRelay(targetHost)
+
+			log.Println(tlsresult)
+			log.Println(orresult)
+			println()
 		}
 	}
 

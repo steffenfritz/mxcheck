@@ -84,11 +84,13 @@ func getSPF(targetHostName string) string {
 	if len(in.Answer) == 0 {
 		spf = "-- No SPF entry set"
 	} else {
-		//if t, ok := in.Answer[0].(*dns.SPF); ok {
-		if t, ok := in.Answer[0].(*dns.SPF); ok {
-			spf = "++ " + t.Txt[0]
+		if t, ok := in.Answer[0].(*dns.TXT); ok {
+			for _, v := range t.Txt {
+				if strings.HasPrefix(v, "v=spf1") {
+					spf = "++ SPF entry set"
+				}
+			}
 		}
 	}
-
 	return spf
 }
