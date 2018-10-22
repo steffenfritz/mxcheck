@@ -15,4 +15,4 @@ v1.0.0
 
 # Usage Example
 
-    ./mxcheck -targetHost 2600.com
+    ./mxcheck -t 2600.com
