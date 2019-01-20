@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	. "github.com/logrusorgru/aurora"
 	"log"
 )
 
@@ -30,9 +31,9 @@ func main() {
 	log.Println("ii PTR entry: " + ptrentry)
 
 	if ptrentry == targetHost {
-		log.Println("++ PTR matches MX record")
+		log.Println(Green("++ PTR matches MX record"))
 	} else {
-		log.Println("-- PTR does not match MX record")
+		log.Println(Red("-- PTR does not match MX record"))
 	}
 
 	log.Println("ii Checking for SPF record")
@@ -44,7 +45,7 @@ func main() {
 	log.Print("ii Open ports: ", openPorts)
 
 	if len(openPorts) == 0 {
-		log.Println("ii No open ports to connect to. Quitting.")
+		log.Println(Cyan("ii No open ports to connect to. Quitting."))
 		return
 	}
 
@@ -53,8 +54,17 @@ func main() {
 			log.Println("ii Checking for open relay")
 			tlsresult, orresult := openRelay(targetHost)
 
-			log.Println(tlsresult)
-			log.Println(orresult)
+			if tlsresult {
+				log.Println(Green("++ StartTLS supported"))
+			} else {
+				log.Println("-- StartTLS not supported")
+			}
+
+			if orresult {
+				log.Println(Red("!! Server is probably an open relay"))
+			} else {
+				log.Println(Green("++ Server is not an open relay"))
+			}
 			println()
 		}
 	}

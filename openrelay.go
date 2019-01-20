@@ -7,9 +7,10 @@ import (
 	"net/smtp"
 )
 
-func openRelay(targetHost string) (string, string) {
-	var tlsresult string
-	var orresult string
+func openRelay(targetHost string) (bool, bool) {
+	//var orresult string
+	var orresult bool
+	var tlsbool bool
 	// set default TLS config
 	tlsconfig := &tls.Config{InsecureSkipVerify: true}
 
@@ -22,25 +23,23 @@ func openRelay(targetHost string) (string, string) {
 
 	// a TLS check
 	err = c.StartTLS(tlsconfig)
-	if err != nil {
-		tlsresult = "-- StartTLS not supported"
-	} else {
-		tlsresult = "++ StartTLS supported"
+	if err == nil {
+		tlsbool = true
 	}
 
 	err = c.Mail(mailFrom)
 	if err != nil {
-		orresult = "++ Server is not an open relay. Last message:"
-		log.Println(err)
-		return tlsresult, orresult
+		//orresult = "++ Server is not an open relay. Last message:"
+		//log.Println(err)
+		return tlsbool, orresult
 	}
 
 	log.Println("ii Fake sender accepted.")
 
 	err = c.Rcpt(mailTo)
 	if err != nil {
-		orresult = "++ Server is not an open relay. Last message: " + err.Error()
-		return tlsresult, orresult
+		//orresult = "++ Server is not an open relay. Last message: " + err.Error()
+		return tlsbool, orresult
 	}
 
 	wc, err := c.Data()
@@ -50,7 +49,8 @@ func openRelay(targetHost string) (string, string) {
 	e(err)
 	err = c.Quit()
 	e(err)
-	orresult = "!! This server is probably an open relay"
+	//orresult = "!! This server is probably an open relay"
+	orresult = true
 
-	return tlsresult, orresult
+	return tlsbool, orresult
 }
