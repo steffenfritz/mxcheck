@@ -13,7 +13,7 @@ func main() {
 	println(versionmsg)
 
 	targetHostName := flag.String("t", "localhost", "The target host to check")
-	dnsServer := flag.String("-d", "8.8.8.8", "The dns server to consult")
+	dnsServer := flag.String("d", "8.8.8.8", "The dns server to consult")
 	flag.Parse()
 	log.Println("ii Checking: " + *targetHostName)
 
