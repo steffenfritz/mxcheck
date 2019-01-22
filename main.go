@@ -1,3 +1,4 @@
+// mxcheck is a security scanner for mail servers
 package main
 
 import (
