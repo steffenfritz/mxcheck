@@ -13,10 +13,11 @@ func main() {
 	println(versionmsg)
 
 	targetHostName := flag.String("t", "localhost", "The target host to check")
+	dnsServer := flag.String("-d", "8.8.8.8", "The dns server to consult")
 	flag.Parse()
 	log.Println("ii Checking: " + *targetHostName)
 
-	targetHost, mxstatus := getMX(targetHostName)
+	targetHost, mxstatus := getMX(targetHostName, dnsServer)
 	if mxstatus {
 		log.Println("ii Found MX: " + targetHost)
 	} else {
@@ -24,11 +25,11 @@ func main() {
 	}
 
 	log.Println("ii Checking for A record")
-	ipaddr := getA(targetHost)
+	ipaddr := getA(targetHost, dnsServer)
 	log.Println("ii IP address MX: " + ipaddr)
 
 	log.Println("ii Checking for PTR record")
-	ptrentry := getPTR(ipaddr)
+	ptrentry := getPTR(ipaddr, dnsServer)
 	log.Println("ii PTR entry: " + ptrentry)
 
 	if ptrentry == targetHost {
@@ -38,7 +39,7 @@ func main() {
 	}
 
 	log.Println("ii Checking for SPF record")
-	spfentry := getSPF(*targetHostName)
+	spfentry := getSPF(*targetHostName, dnsServer)
 	log.Println(spfentry)
 
 	log.Println("ii Checking for open mail ports")
