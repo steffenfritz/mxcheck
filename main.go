@@ -17,7 +17,7 @@ func main() {
 	flag.Parse()
 	log.Println("ii Checking: " + *targetHostName)
 
-	targetHost, mxstatus := getMX(targetHostName, dnsServer)
+	targetHost, mxstatus := getMX(targetHostName, *dnsServer)
 	if mxstatus {
 		log.Println("ii Found MX: " + targetHost)
 	} else {
@@ -25,11 +25,11 @@ func main() {
 	}
 
 	log.Println("ii Checking for A record")
-	ipaddr := getA(targetHost, dnsServer)
+	ipaddr := getA(targetHost, *dnsServer)
 	log.Println("ii IP address MX: " + ipaddr)
 
 	log.Println("ii Checking for PTR record")
-	ptrentry := getPTR(ipaddr, dnsServer)
+	ptrentry := getPTR(ipaddr, *dnsServer)
 	log.Println("ii PTR entry: " + ptrentry)
 
 	if ptrentry == targetHost {
@@ -39,7 +39,7 @@ func main() {
 	}
 
 	log.Println("ii Checking for SPF record")
-	spfentry := getSPF(*targetHostName, dnsServer)
+	spfentry := getSPF(*targetHostName, *dnsServer)
 	log.Println(spfentry)
 
 	log.Println("ii Checking for open mail ports")
