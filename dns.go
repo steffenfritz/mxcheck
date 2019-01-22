@@ -6,7 +6,7 @@ import (
 	"github.com/miekg/dns"
 )
 
-func getMX(targetHostName *string) (string, bool) {
+func getMX(targetHostName *string, dnsServer string) (string, bool) {
 	var mx string
 	var mxstatus bool
 
@@ -14,7 +14,7 @@ func getMX(targetHostName *string) (string, bool) {
 	m.SetQuestion(dns.Fqdn(*targetHostName), dns.TypeMX)
 
 	c := new(dns.Client)
-	in, _, err := c.Exchange(m, "8.8.8.8:53")
+	in, _, err := c.Exchange(m, dnsServer+":53")
 	e(err)
 
 	if len(in.Answer) == 0 {
@@ -30,14 +30,14 @@ func getMX(targetHostName *string) (string, bool) {
 
 }
 
-func getA(targetHostName string) string {
+func getA(targetHostName string, dnsServer string) string {
 	var a string
 
 	m := new(dns.Msg)
 	m.SetQuestion(targetHostName, dns.TypeA)
 
 	c := new(dns.Client)
-	in, _, err := c.Exchange(m, "8.8.8.8:53")
+	in, _, err := c.Exchange(m, dnsServer+":53")
 	e(err)
 
 	if t, ok := in.Answer[0].(*dns.A); ok {
@@ -47,7 +47,7 @@ func getA(targetHostName string) string {
 	return a
 }
 
-func getPTR(ipaddr string) string {
+func getPTR(ipaddr string, dnsServer string) string {
 	var ptr string
 
 	ipslice := strings.Split(ipaddr, ".")
@@ -59,7 +59,7 @@ func getPTR(ipaddr string) string {
 	m.SetQuestion(dns.Fqdn(rddapi), dns.TypePTR)
 
 	c := new(dns.Client)
-	in, _, err := c.Exchange(m, "8.8.8.8:53")
+	in, _, err := c.Exchange(m, dnsServer+":53")
 	e(err)
 
 	if len(in.Answer) == 0 {
@@ -73,14 +73,14 @@ func getPTR(ipaddr string) string {
 	return ptr
 }
 
-func getSPF(targetHostName string) string {
+func getSPF(targetHostName string, dnsServer string) string {
 	var spf string
 
 	m := new(dns.Msg)
 	m.SetQuestion(dns.Fqdn(targetHostName), dns.TypeTXT)
 
 	c := new(dns.Client)
-	in, _, err := c.Exchange(m, "8.8.8.8:53")
+	in, _, err := c.Exchange(m, dnsServer+":53")
 	e(err)
 
 	if len(in.Answer) == 0 {
