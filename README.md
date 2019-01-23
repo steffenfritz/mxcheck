@@ -25,6 +25,6 @@ v1.1.0
     ./mxcheck -t 2600.com -v
     ./mxcheck -t 2600.com -v -d 8.8.8.8
 
-All people like vidoes nowadays: 
+All people like videos nowadays: 
 
-[![asciicast](https://asciinema.org/a/tapqMW8iRngAjnJJWeTkHAoSp<Paste>)](https://asciinema.org/a/tapqMW8iRngAjnJJWeTkHAoSp)
+[![asciicast](https://asciinema.org/a/tapqMW8iRngAjnJJWeTkHAoSp)](https://asciinema.org/a/tapqMW8iRngAjnJJWeTkHAoSp)
