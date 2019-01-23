@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"strings"
 
 	"github.com/miekg/dns"
@@ -40,6 +41,10 @@ func getA(targetHostName string, dnsServer string) string {
 	in, _, err := c.Exchange(m, dnsServer+":53")
 	e(err)
 
+	if len(in.Answer) == 0 {
+		log.Fatalln("No Answer from DNS")
+	}
+
 	if t, ok := in.Answer[0].(*dns.A); ok {
 		a = t.A.String()
 	}
@@ -73,8 +78,8 @@ func getPTR(ipaddr string, dnsServer string) string {
 	return ptr
 }
 
-func getSPF(targetHostName string, dnsServer string) string {
-	var spf string
+func getSPF(targetHostName string, dnsServer string, verbose bool) bool {
+	var spf bool
 
 	m := new(dns.Msg)
 	m.SetQuestion(dns.Fqdn(targetHostName), dns.TypeTXT)
@@ -83,13 +88,14 @@ func getSPF(targetHostName string, dnsServer string) string {
 	in, _, err := c.Exchange(m, dnsServer+":53")
 	e(err)
 
-	if len(in.Answer) == 0 {
-		spf = "-- No SPF entry set"
-	} else {
+	if len(in.Answer) != 0 {
+		if verbose {
+			log.Println(in.Answer[0])
+		}
 		if t, ok := in.Answer[0].(*dns.TXT); ok {
 			for _, v := range t.Txt {
 				if strings.HasPrefix(v, "v=spf1") {
-					spf = "++ SPF entry set"
+					spf = true
 				}
 			}
 		}
