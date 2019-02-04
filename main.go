@@ -14,6 +14,7 @@ func main() {
 
 	targetHostName := flag.String("t", "localhost", "The target host to check")
 	dnsServer := flag.String("d", "8.8.8.8", "The dns server to consult")
+	verbose := flag.Bool("v", false, "verbose")
 	flag.Parse()
 	log.Println("ii Checking: " + *targetHostName)
 
@@ -39,8 +40,12 @@ func main() {
 	}
 
 	log.Println("ii Checking for SPF record")
-	spfentry := getSPF(*targetHostName, *dnsServer)
-	log.Println(spfentry)
+	spfentry := getSPF(*targetHostName, *dnsServer, *verbose)
+	if spfentry {
+		log.Println(Green("++ SPF set"))
+	} else {
+		log.Println(Red("-- No SPF set"))
+	}
 
 	log.Println("ii Checking for open mail ports")
 	openPorts := portScan(targetHost)

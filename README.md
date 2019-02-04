@@ -1,6 +1,6 @@
 # mxcheck
 
-mxcheck is a security scanner for mail servers
+mxcheck is a info scanner for mail servers
 
 It checks 
   1. DNS records: A, MX, PTR, SPF
@@ -10,7 +10,7 @@ It checks
 
 # Version
 
-v1.1.0-DEV
+v1.1.0
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/steffenfritz/mxcheck)](https://goreportcard.com/report/github.com/steffenfritz/mxcheck) [![Build Status](https://travis-ci.org/steffenfritz/mxcheck.svg?branch=master)](https://travis-ci.org/steffenfritz/mxcheck)
 
@@ -22,3 +22,9 @@ v1.1.0-DEV
 # Usage Example
 
     ./mxcheck -t 2600.com
+    ./mxcheck -t 2600.com -v
+    ./mxcheck -t 2600.com -v -d 8.8.8.8
+
+All people like videos nowadays: 
+
+[![asciicast](https://asciinema.org/a/tapqMW8iRngAjnJJWeTkHAoSp)](https://asciinema.org/a/tapqMW8iRngAjnJJWeTkHAoSp)
