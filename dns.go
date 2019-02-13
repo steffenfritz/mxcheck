@@ -85,19 +85,21 @@ func getSPF(targetHostName string, dnsServer string, verbose bool) bool {
 	m.SetQuestion(dns.Fqdn(targetHostName), dns.TypeTXT)
 
 	c := new(dns.Client)
+	c.Net = "tcp"
 	in, _, err := c.Exchange(m, dnsServer+":53")
 	e(err)
-
+	
 	if len(in.Answer) != 0 {
 		if verbose {
 			log.Println(in.Answer[0])
 		}
-		if t, ok := in.Answer[0].(*dns.TXT); ok {
-			for _, v := range t.Txt {
-				if strings.HasPrefix(v, "v=spf1") {
-					spf = true
-				}
-			}
+		for n := range in.Answer {
+		    t := *in.Answer[n].(*dns.TXT)
+		        for _, v := range t.Txt {
+			    if strings.HasPrefix(v, "v=spf1") {
+				spf = true
+			    }		}
+		
 		}
 	}
 
