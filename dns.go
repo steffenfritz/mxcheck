@@ -90,15 +90,16 @@ func getSPF(targetHostName string, dnsServer string, verbose bool) bool {
 	e(err)
 	
 	if len(in.Answer) != 0 {
-		if verbose {
-			log.Println(in.Answer[0])
-		}
 		for n := range in.Answer {
 		    t := *in.Answer[n].(*dns.TXT)
 		        for _, v := range t.Txt {
 			    if strings.HasPrefix(v, "v=spf1") {
 				spf = true
-			    }		}
+				if verbose {
+				    log.Println(in.Answer[n])
+				}
+			    }
+		}
 		
 		}
 	}

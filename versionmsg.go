@@ -1,6 +1,6 @@
 package main
 
-var version = "1.1.0"
+var version = "1.1.1"
 var info = "mxcheck --  Copyright (C) 2019  Steffen Fritz -- "
 
 var license = `This program comes with ABSOLUTELY NO WARRANTY.

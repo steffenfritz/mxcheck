@@ -1,16 +1,16 @@
 # mxcheck
 
-mxcheck is a info scanner for mail servers
+mxcheck is an info scanner for mail servers
 
 It checks 
   1. DNS records: A, MX, PTR, SPF
-  2. support of StartTLS
-  3. Portscan: 25, 465, 587
-  4. Open Relay
+  2. for support of StartTLS
+  3. open ports: 25, 465, 587
+  4. and if the server is an open relay
 
 # Version
 
-v1.1.0
+v1.1.1
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/steffenfritz/mxcheck)](https://goreportcard.com/report/github.com/steffenfritz/mxcheck) [![Build Status](https://travis-ci.org/steffenfritz/mxcheck.svg?branch=master)](https://travis-ci.org/steffenfritz/mxcheck)
 
@@ -25,6 +25,3 @@ v1.1.0
     ./mxcheck -t 2600.com -v
     ./mxcheck -t 2600.com -v -d 8.8.8.8
 
-All people like videos nowadays: 
-
-[![asciicast](https://asciinema.org/a/tapqMW8iRngAjnJJWeTkHAoSp)](https://asciinema.org/a/tapqMW8iRngAjnJJWeTkHAoSp)
