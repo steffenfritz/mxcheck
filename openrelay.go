@@ -7,16 +7,15 @@ import (
 	"net/smtp"
 )
 
-func openRelay(targetHost string) (bool, bool) {
+// openRelay checks if a mail server sends email without
+// authentication and with a fake sender address.
+// It returns two booleans: if starttls is used an the result
+func openRelay(mailFrom string, mailTo string, targetHost string) (bool, bool) {
 	//var orresult string
 	var orresult bool
 	var tlsbool bool
 	// set default TLS config
 	tlsconfig := &tls.Config{InsecureSkipVerify: true}
-
-	// set email addresses for open relay test
-	mailFrom := "foo@bar.baz"
-	mailTo := "bar@foo.baz"
 
 	c, err := smtp.Dial(targetHost + ":25")
 	e(err)
@@ -49,7 +48,6 @@ func openRelay(targetHost string) (bool, bool) {
 	e(err)
 	err = c.Quit()
 	e(err)
-	//orresult = "!! This server is probably an open relay"
 	orresult = true
 
 	return tlsbool, orresult

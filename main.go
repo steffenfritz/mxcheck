@@ -2,8 +2,8 @@
 package main
 
 import (
-	"flag"
 	. "github.com/logrusorgru/aurora"
+	flag "github.com/spf13/pflag"
 	"log"
 )
 
@@ -12,10 +12,15 @@ func main() {
 	println()
 	println(versionmsg)
 
-	targetHostName := flag.String("t", "localhost", "The target host to check")
-	dnsServer := flag.String("d", "8.8.8.8", "The dns server to consult")
-	verbose := flag.Bool("v", false, "verbose")
+	dnsServer := flag.StringP("dnsserver", "d", "8.8.8.8", "The dns server to consult")
+	mailFrom := flag.StringP("mailfrom", "f", "infi@foo.wtf", "Set the mail from address")
+	mailTo := flag.StringP("mailto", "t", "info@baz.wtf", "Set the mail to address")
+	targetHostName := flag.StringP("host","h", "localhost", "The target host to check")
+	verbose := flag.BoolP("verbose", "v", false, "verbose")
+
 	flag.Parse()
+
+
 	log.Println("ii Checking: " + *targetHostName)
 
 	targetHost, mxstatus := getMX(targetHostName, *dnsServer)
@@ -59,7 +64,7 @@ func main() {
 	for _, port := range openPorts {
 		if port == "25" {
 			log.Println("ii Checking for open relay")
-			tlsresult, orresult := openRelay(targetHost)
+			tlsresult, orresult := openRelay(*mailFrom, *mailTo, targetHost)
 
 			if tlsresult {
 				log.Println(Green("++ StartTLS supported"))
