@@ -7,7 +7,7 @@ import (
 	"github.com/miekg/dns"
 )
 
-// getMX builds a MX record dns request and sends it to a dns server
+// getMX builds an MX record dns request and sends it to a dns server
 // It returns a single mx entry and its status
 func getMX(targetHostName *string, dnsServer string) (string, bool) {
 	var mx string

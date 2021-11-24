@@ -44,7 +44,7 @@ func openRelay(targetHost string) (bool, bool) {
 
 	wc, err := c.Data()
 	e(err)
-	fmt.Fprintf(wc, "From: <"+mailFrom+">\n\n"+"This server is an open relay")
+	_, err = fmt.Fprintf(wc, "From: <"+mailFrom+">\n\n"+"This server is an open relay")
 	err = wc.Close()
 	e(err)
 	err = c.Quit()
