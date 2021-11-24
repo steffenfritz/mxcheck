@@ -7,6 +7,8 @@ import (
 	"github.com/miekg/dns"
 )
 
+// getMX builds a MX record dns request and sends it to a dns server
+// It returns a single mx entry and its status
 func getMX(targetHostName *string, dnsServer string) (string, bool) {
 	var mx string
 	var mxstatus bool
@@ -31,6 +33,8 @@ func getMX(targetHostName *string, dnsServer string) (string, bool) {
 
 }
 
+// getA builds an A record dns request and sends it to a dns server
+// It returns a single ip address
 func getA(targetHostName string, dnsServer string) string {
 	var a string
 
@@ -52,6 +56,8 @@ func getA(targetHostName string, dnsServer string) string {
 	return a
 }
 
+// getPTR builds a PTR dns request and sends it to a dns server
+// It returns a single ptr entry
 func getPTR(ipaddr string, dnsServer string) string {
 	var ptr string
 
@@ -78,6 +84,8 @@ func getPTR(ipaddr string, dnsServer string) string {
 	return ptr
 }
 
+// getSPF builds a spf dns request and sends it to a dns server
+// It returns a bool if a spf is set and has "v=spf1"
 func getSPF(targetHostName string, dnsServer string, verbose bool) bool {
 	var spf bool
 
@@ -88,20 +96,20 @@ func getSPF(targetHostName string, dnsServer string, verbose bool) bool {
 	c.Net = "tcp"
 	in, _, err := c.Exchange(m, dnsServer+":53")
 	e(err)
-	
-	if len(in.Answer) != 0 {
-	    for n := range in.Answer {
-	        t := *in.Answer[n].(*dns.TXT)
-		for _, v := range t.Txt {
-		    if strings.HasPrefix(v, "v=spf1") {
-		        spf = true
-			if verbose {
-			    log.Println(in.Answer[n])
-			}
-		    }
-	        }
-	    }
-        }
 
-    return spf
+	if len(in.Answer) != 0 {
+		for n := range in.Answer {
+			t := *in.Answer[n].(*dns.TXT)
+			for _, v := range t.Txt {
+				if strings.HasPrefix(v, "v=spf1") {
+					spf = true
+					if verbose {
+						log.Println(in.Answer[n])
+					}
+				}
+			}
+		}
+	}
+
+	return spf
 }
