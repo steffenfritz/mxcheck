@@ -9,9 +9,10 @@ import (
 
 // getMX builds an MX record dns request and sends it to a dns server
 // It returns a single mx entry and its status
-func getMX(targetHostName *string, dnsServer string) (string, bool) {
-	var mx string
+func getMX(targetHostName *string, dnsServer string) ([]string, bool) {
+	// var mx string
 	var mxstatus bool
+	var mxlist []string
 
 	m := new(dns.Msg)
 	m.SetQuestion(dns.Fqdn(*targetHostName), dns.TypeMX)
@@ -22,15 +23,19 @@ func getMX(targetHostName *string, dnsServer string) (string, bool) {
 
 
 	if len(in.Answer) == 0 {
-		mx = *targetHostName
+		mxlist = append(mxlist, *targetHostName)
 	} else {
-		if t, ok := in.Answer[0].(*dns.MX); ok {
-			mx = t.Mx
-			mxstatus = true
+
+		for _ , mxentry := range in.Answer {
+			if t, ok := mxentry.(*dns.MX); ok {
+				mxlist = append(mxlist, t.Mx)
+			}
 		}
+
+		mxstatus = true
 	}
 
-	return mx, mxstatus
+	return mxlist, mxstatus
 
 }
 
