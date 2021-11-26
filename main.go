@@ -13,9 +13,9 @@ func main() {
 	println(versionmsg)
 
 	dnsServer := flag.StringP("dnsserver", "d", "8.8.8.8", "The dns server to consult")
-	mailFrom := flag.StringP("mailfrom", "f", "infi@foo.wtf", "Set the mail from address")
-	mailTo := flag.StringP("mailto", "t", "info@baz.wtf", "Set the mail to address")
-	targetHostName := flag.StringP("host","h", "localhost", "The target host to check")
+	mailFrom := flag.StringP("mailfrom", "f", "info@foo.wtf", "Set the mailFrom address")
+	mailTo := flag.StringP("mailto", "t", "info@baz.wtf", "Set the mailTo address")
+	targetHostName := flag.StringP("service","s", "localhost", "The service host to check")
 	verbose := flag.BoolP("verbose", "v", false, "verbose")
 
 	flag.Parse()
@@ -45,9 +45,12 @@ func main() {
 	}
 
 	log.Println("ii Checking for SPF record")
-	spfentry := getSPF(*targetHostName, *dnsServer, *verbose)
+	spfentry, spfanswer := getSPF(*targetHostName, *dnsServer)
 	if spfentry {
 		log.Println(Green("++ SPF set"))
+		if *verbose {
+			log.Println("ii " + spfanswer)
+		}
 	} else {
 		log.Println(Red("-- No SPF set"))
 	}
@@ -64,12 +67,20 @@ func main() {
 	for _, port := range openPorts {
 		if port == "25" {
 			log.Println("ii Checking for open relay")
-			tlsresult, orresult := openRelay(*mailFrom, *mailTo, targetHost)
+			tlsresult, tlsvalid, orresult := openRelay(*mailFrom, *mailTo, targetHost)
 
 			if tlsresult {
 				log.Println(Green("++ StartTLS supported"))
 			} else {
 				log.Println("-- StartTLS not supported")
+			}
+
+			if tlsresult  && tlsvalid{
+				log.Println(Green("++ Certificate is valid"))
+			}
+
+			if tlsresult && !tlsvalid {
+				log.Println("-- Certificate not valid")
 			}
 
 			if orresult {

@@ -20,6 +20,7 @@ func getMX(targetHostName *string, dnsServer string) (string, bool) {
 	in, _, err := c.Exchange(m, dnsServer+":53")
 	e(err)
 
+
 	if len(in.Answer) == 0 {
 		mx = *targetHostName
 	} else {
@@ -86,8 +87,9 @@ func getPTR(ipaddr string, dnsServer string) string {
 
 // getSPF builds a spf dns request and sends it to a dns server
 // It returns a bool if a spf is set and has "v=spf1"
-func getSPF(targetHostName string, dnsServer string, verbose bool) bool {
+func getSPF(targetHostName string, dnsServer string) (bool, string) {
 	var spf bool
+	var spfanswer string
 
 	m := new(dns.Msg)
 	m.SetQuestion(dns.Fqdn(targetHostName), dns.TypeTXT)
@@ -103,13 +105,11 @@ func getSPF(targetHostName string, dnsServer string, verbose bool) bool {
 			for _, v := range t.Txt {
 				if strings.HasPrefix(v, "v=spf1") {
 					spf = true
-					if verbose {
-						log.Println(in.Answer[n])
-					}
+					spfanswer = in.Answer[n].String()
 				}
 			}
 		}
 	}
 
-	return spf
+	return spf, spfanswer
 }
