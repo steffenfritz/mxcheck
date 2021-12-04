@@ -19,15 +19,17 @@ func main() {
 	mailFrom := flag.StringP("mailfrom", "f", "info@foo.wtf", "Set the mailFrom address")
 	mailTo := flag.StringP("mailto", "t", "info@baz.wtf", "Set the mailTo address")
 	noprompt := flag.BoolP("no-prompt", "n", false, "answer yes to all questions")
-	targetHostName := flag.StringP("service","s", "localhost", "The service host to check")
+	targetHostName := flag.StringP("service", "s", "localhost", "The service host to check")
 	verbose := flag.BoolP("verbose", "v", false, "verbose")
 
 	flag.Parse()
 
-
 	log.Println("ii Checking: " + *targetHostName)
 
-	targetHosts, mxstatus := getMX(targetHostName, *dnsServer)
+	err, targetHosts, mxstatus := getMX(targetHostName, *dnsServer)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	if mxstatus {
 		log.Println("ii Found MX: ")
 		for _, mxentry := range targetHosts {
@@ -54,11 +56,17 @@ func main() {
 
 	for _, targetHost := range targetHosts {
 		log.Println("ii Checking for A record")
-		ipaddr := getA(targetHost, *dnsServer)
+		err, ipaddr := getA(targetHost, *dnsServer)
+		if err != nil {
+			log.Fatalln("ee " + err.Error())
+		}
 		log.Println("ii IP address MX: " + ipaddr)
 
 		log.Println("ii Checking for PTR record")
-		ptrentry := getPTR(ipaddr, *dnsServer)
+		err, ptrentry := getPTR(ipaddr, *dnsServer)
+		if err != nil {
+			log.Fatalln("ee " + err.Error())
+		}
 		log.Println("ii PTR entry: " + ptrentry)
 
 		if ptrentry == targetHost {
@@ -68,7 +76,10 @@ func main() {
 		}
 
 		log.Println("ii Checking for SPF record")
-		spfentry, spfanswer := getSPF(*targetHostName, *dnsServer)
+		err, spfentry, spfanswer := getSPF(*targetHostName, *dnsServer)
+		if err != nil {
+			log.Fatalln("ee " + err.Error())
+		}
 		if spfentry {
 			log.Println(Green("++ SPF set"))
 			if *verbose {
@@ -90,23 +101,26 @@ func main() {
 		for _, port := range openPorts {
 			if port == "25" {
 				log.Println("ii Checking for open relay")
-				tlsresult, tlsvalid, orresult := openRelay(*mailFrom, *mailTo, targetHost)
+				err, orresult := openRelay(*mailFrom, *mailTo, targetHost)
+				if err != nil {
+					log.Fatalln("err " + err.Error())
+				}
 
-				if tlsresult {
+				if orresult.tlsbool {
 					log.Println(Green("++ StartTLS supported"))
 				} else {
 					log.Println("-- StartTLS not supported")
 				}
 
-				if tlsresult && tlsvalid {
+				if orresult.tlsbool && orresult.tlsvalid {
 					log.Println(Green("++ Certificate is valid"))
 				}
 
-				if tlsresult && !tlsvalid {
+				if orresult.tlsbool && !orresult.tlsvalid {
 					log.Println("-- Certificate not valid")
 				}
 
-				if orresult {
+				if orresult.orresult {
 					log.Println(Red("!! Server is probably an open relay"))
 				} else {
 					log.Println(Green("++ Server is not an open relay"))

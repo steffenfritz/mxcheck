@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"errors"
 	"strings"
 
 	"github.com/miekg/dns"
@@ -9,7 +9,7 @@ import (
 
 // getMX builds an MX record dns request and sends it to a dns server
 // It returns a single mx entry and its status
-func getMX(targetHostName *string, dnsServer string) ([]string, bool) {
+func getMX(targetHostName *string, dnsServer string) (error, []string, bool) {
 	// var mx string
 	var mxstatus bool
 	var mxlist []string
@@ -19,14 +19,15 @@ func getMX(targetHostName *string, dnsServer string) ([]string, bool) {
 
 	c := new(dns.Client)
 	in, _, err := c.Exchange(m, dnsServer+":53")
-	e(err)
-
+	if err != nil {
+		return err, mxlist, mxstatus
+	}
 
 	if len(in.Answer) == 0 {
 		mxlist = append(mxlist, *targetHostName)
 	} else {
 
-		for _ , mxentry := range in.Answer {
+		for _, mxentry := range in.Answer {
 			if t, ok := mxentry.(*dns.MX); ok {
 				mxlist = append(mxlist, t.Mx)
 			}
@@ -35,13 +36,13 @@ func getMX(targetHostName *string, dnsServer string) ([]string, bool) {
 		mxstatus = true
 	}
 
-	return mxlist, mxstatus
+	return err, mxlist, mxstatus
 
 }
 
 // getA builds an A record dns request and sends it to a dns server
 // It returns a single ip address
-func getA(targetHostName string, dnsServer string) string {
+func getA(targetHostName string, dnsServer string) (error, string) {
 	var a string
 
 	m := new(dns.Msg)
@@ -49,22 +50,25 @@ func getA(targetHostName string, dnsServer string) string {
 
 	c := new(dns.Client)
 	in, _, err := c.Exchange(m, dnsServer+":53")
-	e(err)
+	if err != nil {
+		return err, a
+	}
 
 	if len(in.Answer) == 0 {
-		log.Fatalln("No Answer from DNS")
+		// log.Fatalln("No Answer from DNS")
+		return errors.New("no answer from DNS"), a
 	}
 
 	if t, ok := in.Answer[0].(*dns.A); ok {
 		a = t.A.String()
 	}
 
-	return a
+	return err, a
 }
 
 // getPTR builds a PTR dns request and sends it to a dns server
 // It returns a single ptr entry
-func getPTR(ipaddr string, dnsServer string) string {
+func getPTR(ipaddr string, dnsServer string) (error, string) {
 	var ptr string
 
 	ipslice := strings.Split(ipaddr, ".")
@@ -77,7 +81,9 @@ func getPTR(ipaddr string, dnsServer string) string {
 
 	c := new(dns.Client)
 	in, _, err := c.Exchange(m, dnsServer+":53")
-	e(err)
+	if err != nil {
+		return err, ptr
+	}
 
 	if len(in.Answer) == 0 {
 		ptr = "No PTR set"
@@ -87,12 +93,12 @@ func getPTR(ipaddr string, dnsServer string) string {
 		}
 	}
 
-	return ptr
+	return err, ptr
 }
 
 // getSPF builds a spf dns request and sends it to a dns server
 // It returns a bool if a spf is set and has "v=spf1"
-func getSPF(targetHostName string, dnsServer string) (bool, string) {
+func getSPF(targetHostName string, dnsServer string) (error, bool, string) {
 	var spf bool
 	var spfanswer string
 
@@ -102,7 +108,9 @@ func getSPF(targetHostName string, dnsServer string) (bool, string) {
 	c := new(dns.Client)
 	c.Net = "tcp"
 	in, _, err := c.Exchange(m, dnsServer+":53")
-	e(err)
+	if err != nil {
+		return err, spf, spfanswer
+	}
 
 	if len(in.Answer) != 0 {
 		for n := range in.Answer {
@@ -116,5 +124,5 @@ func getSPF(targetHostName string, dnsServer string) (bool, string) {
 		}
 	}
 
-	return spf, spfanswer
+	return err, spf, spfanswer
 }
