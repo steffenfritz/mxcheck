@@ -8,9 +8,14 @@ import (
 )
 
 type openResult struct {
-	orresult bool
-	tlsbool  bool
-	tlsvalid bool
+	orboolresult     bool
+	orresult         string
+	rcptresult       string
+	rcptboolresult   bool
+	senderresult     string
+	senderboolresult bool
+	tlsbool          bool
+	tlsvalid         bool
 }
 
 // openRelay checks if a mail server sends email without
@@ -43,35 +48,55 @@ func openRelay(mailFrom string, mailTo string, targetHost string) (error, openRe
 		}
 	}
 
+	// Set from value
 	err = c.Mail(mailFrom)
 	if err != nil {
-		return err, or
+		or.senderresult = err.Error()
+	} else {
+		or.senderboolresult = true
 	}
 
-	// ToDo: if err == nil print in main
-	log.Println("ii Fake sender accepted.")
+	if or.senderboolresult {
+		log.Println("ii Fake sender accepted.")
+	} else {
+		log.Println("ww Fake sender not accepted.")
+	}
 
+	// Set recipient value
 	err = c.Rcpt(mailTo)
 	if err != nil {
-		return err, or
+		or.rcptresult = err.Error()
+	} else {
+		or.rcptboolresult = true
 	}
 
+	if or.rcptboolresult {
+		log.Println("ii Recipient accepted.")
+	} else {
+		log.Println("ii Recipient not accepted. Skipping further open relay tests.")
+		return nil, or
+	}
+
+	// Create WriteCloser
 	wc, err := c.Data()
 	if err != nil {
 		return err, or
 	}
 
+	// Write test message, close and quit
+	// If we can write the message to wc we
+	// set the orboolresult to true
 	_, err = fmt.Fprintf(wc, "From: <"+mailFrom+">\n\n"+"This server is an open relay")
-	err = wc.Close()
-	if err != nil {
-		return err, or
+	orerr := wc.Close()
+	if orerr != nil {
+		or.orresult = orerr.Error()
+	} else {
+		or.orboolresult = true
 	}
 	err = c.Quit()
 	if err != nil {
 		return err, or
 	}
-
-	or.orresult = true
 
 	return err, or
 }

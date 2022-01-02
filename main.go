@@ -13,16 +13,25 @@ import (
 func main() {
 
 	println()
-	println(versionmsg)
 
 	dnsServer := flag.StringP("dnsserver", "d", "8.8.8.8", "The dns server to consult")
 	mailFrom := flag.StringP("mailfrom", "f", "info@foo.wtf", "Set the mailFrom address")
 	mailTo := flag.StringP("mailto", "t", "info@baz.wtf", "Set the mailTo address")
 	noprompt := flag.BoolP("no-prompt", "n", false, "answer yes to all questions")
-	targetHostName := flag.StringP("service", "s", "localhost", "The service host to check")
-	verbose := flag.BoolP("verbose", "v", false, "verbose")
+	targetHostName := flag.StringP("service", "s", "",
+		"The service host to check")
+	verbose := flag.BoolP("version", "v", false, "version and license")
 
 	flag.Parse()
+
+	if *verbose {
+		println(versionmsg)
+	}
+
+	if len(*targetHostName) == 0 {
+		log.Println("ee The service flag is mandatory.")
+		return
+	}
 
 	log.Println("ii Checking: " + *targetHostName)
 
@@ -36,19 +45,18 @@ func main() {
 			log.Println("ii           " + mxentry)
 		}
 	} else {
-		log.Println("-- No MX entry found. Using Target Host Name.")
+		log.Println("ww No MX entry found. Using Target Host Name.")
 	}
 
 	if !*noprompt {
 		reader := bufio.NewReader(os.Stdin)
-		log.Print("\nContinue [y/n]: ")
+		log.Print("ii Continue [y/n]: ")
 		response, err := reader.ReadString('\n')
 		if err != nil {
 			log.Fatal(err)
 		}
 		response = strings.ToLower(strings.TrimSpace(response))
 		if response != "y" {
-
 			log.Println("ii User terminated. Bye.")
 			return
 		}
@@ -103,7 +111,7 @@ func main() {
 				log.Println("ii Checking for open relay")
 				err, orresult := openRelay(*mailFrom, *mailTo, targetHost)
 				if err != nil {
-					log.Fatalln("err " + err.Error())
+					log.Println("ww " + err.Error())
 				}
 
 				if orresult.tlsbool {
@@ -120,7 +128,7 @@ func main() {
 					log.Println("-- Certificate not valid")
 				}
 
-				if orresult.orresult {
+				if orresult.orboolresult {
 					log.Println(Red("!! Server is probably an open relay"))
 				} else {
 					log.Println(Green("++ Server is not an open relay"))

@@ -2,7 +2,7 @@ package main
 
 var Version string
 var Build string
-var info = "mxcheck --  Copyright (C) 2019  Steffen Fritz -- "
+var info = "mxcheck --  Copyright (C) 2019-2021  Steffen Fritz -- "
 
 var license = `This program comes with ABSOLUTELY NO WARRANTY.
 This is free software under GPL-3.0, and you are welcome to 
