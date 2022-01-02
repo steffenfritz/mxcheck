@@ -3,11 +3,13 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	. "github.com/logrusorgru/aurora"
 	flag "github.com/spf13/pflag"
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -50,7 +52,8 @@ func main() {
 
 	if !*noprompt {
 		reader := bufio.NewReader(os.Stdin)
-		log.Print("ii Continue [y/n]: ")
+		logfixingdate := time.Now().Format("2006/01/02 15:04:05")
+		fmt.Print(logfixingdate + " ii Continue [y/n]: ")
 		response, err := reader.ReadString('\n')
 		if err != nil {
 			log.Fatal(err)
