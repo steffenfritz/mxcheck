@@ -16,12 +16,12 @@ You can set mailFrom, mailTo and the DNS server.
     -t, --mailto string      Set the mailTo address (default "info@baz.wtf")
     -n, --no-prompt          answer yes to all questions
     -s, --service string     The service host to check (default "localhost")
-    -v, --verbose            verbose
+    -v, --version            version and license
 
 
 # Version
 
-v1.2.0-BETA
+v1.2.0-RC1
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/steffenfritz/mxcheck)](https://goreportcard.com/report/github.com/steffenfritz/mxcheck) 
 
