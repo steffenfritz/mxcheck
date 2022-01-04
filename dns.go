@@ -126,3 +126,33 @@ func getSPF(targetHostName string, dnsServer string) (error, bool, string) {
 
 	return err, spf, spfanswer
 }
+
+// getMTASTS builds a mta-sts request and sends it to a dns server
+// It returns a bool if an mta-sts entry is set
+func getMTASTS(targetHostName string, dnsServer string) (error, bool) {
+	var mtasts bool
+
+	m := new(dns.Msg)
+	m.SetQuestion(dns.Fqdn(targetHostName), dns.TypeTXT)
+
+	c := new(dns.Client)
+	c.Net = "tcp"
+	in, _, err := c.Exchange(m, dnsServer+":53")
+	if err != nil {
+		return err, mtasts
+	}
+
+	if len(in.Answer) != 0 {
+		for n := range in.Answer {
+			t := *in.Answer[n].(*dns.TXT)
+			for _, v := range t.Txt {
+				println(v)
+				if strings.HasPrefix(v, "v=STSv1") {
+					mtasts = true
+				}
+			}
+		}
+	}
+
+	return err, mtasts
+}

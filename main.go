@@ -100,6 +100,19 @@ func main() {
 			log.Println(Red("-- No SPF set"))
 		}
 
+		log.Println("ii Checking for MTA-STS")
+		err, mtastsset := getMTASTS(*targetHostName, *dnsServer)
+		if err != nil {
+			log.Fatalln("ee " + err.Error())
+		}
+		if mtastsset {
+			log.Println(Green("++ MTA-STS set"))
+			log.Println("ii Checking MTA-STS")
+			// ToDo Next
+		} else {
+			log.Println(Red("-- MTA-STS not set"))
+		}
+
 		log.Println("ii Checking for open mail ports")
 		openPorts := portScan(targetHost)
 		log.Print("ii Open ports: ", openPorts)
