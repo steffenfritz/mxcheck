@@ -4,12 +4,13 @@ package main
 import (
 	"bufio"
 	"fmt"
-	. "github.com/logrusorgru/aurora"
-	flag "github.com/spf13/pflag"
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	. "github.com/logrusorgru/aurora"
+	flag "github.com/spf13/pflag"
 )
 
 func main() {
@@ -107,8 +108,8 @@ func main() {
 		}
 		if mtastsset {
 			log.Println(Green("++ MTA-STS set"))
-			log.Println("ii Checking MTA-STS")
-			// ToDo Next
+			log.Println("ii Checking MTA-STS settings")
+			// ToDo: NEXT
 		} else {
 			log.Println(Red("-- MTA-STS not set"))
 		}

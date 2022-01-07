@@ -134,7 +134,7 @@ func getMTASTS(targetHostName string, dnsServer string) (error, bool) {
 	mtastsprefix := "_mta-sts."
 
 	m := new(dns.Msg)
-	m.SetQuestion(dns.Fqdn(targetHostName), dns.TypeTXT)
+	m.SetQuestion(dns.Fqdn(mtastsprefix+targetHostName), dns.TypeTXT)
 
 	c := new(dns.Client)
 	c.Net = "tcp"
@@ -147,7 +147,6 @@ func getMTASTS(targetHostName string, dnsServer string) (error, bool) {
 		for n := range in.Answer {
 			t := *in.Answer[n].(*dns.TXT)
 			for _, v := range t.Txt {
-				println(v)
 				if strings.HasPrefix(v, "v=STSv1") {
 					mtasts = true
 				}
