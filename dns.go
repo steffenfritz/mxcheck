@@ -131,6 +131,7 @@ func getSPF(targetHostName string, dnsServer string) (error, bool, string) {
 // It returns a bool if an mta-sts entry is set
 func getMTASTS(targetHostName string, dnsServer string) (error, bool) {
 	var mtasts bool
+	mtastsprefix := "_mta-sts."
 
 	m := new(dns.Msg)
 	m.SetQuestion(dns.Fqdn(targetHostName), dns.TypeTXT)
