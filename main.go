@@ -107,9 +107,9 @@ func main() {
 			log.Fatalln("ee " + err.Error())
 		}
 		if mtastsset {
-			log.Println(Green("++ MTA-STS set"))
+			log.Println(Green("++ MTA-STS subdomain set"))
 			log.Println("ii Checking MTA-STS settings")
-			// ToDo: NEXT
+			mtasts(*targetHostName)
 		} else {
 			log.Println(Red("-- MTA-STS not set"))
 		}

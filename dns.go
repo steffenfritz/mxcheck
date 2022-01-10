@@ -130,8 +130,9 @@ func getSPF(targetHostName string, dnsServer string) (error, bool, string) {
 // getMTASTS builds a mta-sts request and sends it to a dns server
 // It returns a bool if an mta-sts entry is set
 func getMTASTS(targetHostName string, dnsServer string) (error, bool) {
-	var mtasts bool
+	// This prefix is the fixed subdomain for mta-sts
 	mtastsprefix := "_mta-sts."
+	var mtasts bool
 
 	m := new(dns.Msg)
 	m.SetQuestion(dns.Fqdn(mtastsprefix+targetHostName), dns.TypeTXT)
