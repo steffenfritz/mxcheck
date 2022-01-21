@@ -21,13 +21,13 @@ type openResult struct {
 // openRelay checks if a mail server sends email without
 // authentication and with a fake sender address.
 // It returns a struct:
-func openRelay(mailFrom string, mailTo string, targetHost string) (error, openResult) {
+func openRelay(mailFrom string, mailTo string, targetHost string) (openResult, error) {
 	//var orresult string
 	var or openResult
 
 	c, err := smtp.Dial(targetHost + ":25")
 	if err != nil {
-		return err, or
+		return or, err
 	}
 
 	// set default TLS config
@@ -74,13 +74,13 @@ func openRelay(mailFrom string, mailTo string, targetHost string) (error, openRe
 		log.Println("ii Recipient accepted.")
 	} else {
 		log.Println("ii Recipient not accepted. Skipping further open relay tests.")
-		return nil, or
+		return or, nil
 	}
 
 	// Create WriteCloser
 	wc, err := c.Data()
 	if err != nil {
-		return err, or
+		return or, err
 	}
 
 	// Write test message, close and quit
@@ -95,8 +95,8 @@ func openRelay(mailFrom string, mailTo string, targetHost string) (error, openRe
 	}
 	err = c.Quit()
 	if err != nil {
-		return err, or
+		return or, err
 	}
 
-	return err, or
+	return or, err
 }

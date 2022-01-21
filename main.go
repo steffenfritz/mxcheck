@@ -38,7 +38,7 @@ func main() {
 
 	log.Println("ii Checking: " + *targetHostName)
 
-	err, targetHosts, mxstatus := getMX(targetHostName, *dnsServer)
+	targetHosts, mxstatus, err := getMX(targetHostName, *dnsServer)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -68,14 +68,14 @@ func main() {
 
 	for _, targetHost := range targetHosts {
 		log.Println("ii Checking for A record")
-		err, ipaddr := getA(targetHost, *dnsServer)
+		ipaddr, err := getA(targetHost, *dnsServer)
 		if err != nil {
 			log.Fatalln("ee " + err.Error())
 		}
 		log.Println("ii IP address MX: " + ipaddr)
 
 		log.Println("ii Checking for PTR record")
-		err, ptrentry := getPTR(ipaddr, *dnsServer)
+		ptrentry, err := getPTR(ipaddr, *dnsServer)
 		if err != nil {
 			log.Fatalln("ee " + err.Error())
 		}
@@ -88,7 +88,7 @@ func main() {
 		}
 
 		log.Println("ii Checking for SPF record")
-		err, spfentry, spfanswer := getSPF(*targetHostName, *dnsServer)
+		spfentry, spfanswer, err := getSPF(*targetHostName, *dnsServer)
 		if err != nil {
 			log.Fatalln("ee " + err.Error())
 		}
@@ -102,7 +102,7 @@ func main() {
 		}
 
 		log.Println("ii Checking for MTA-STS")
-		err, mtastsset := getMTASTS(*targetHostName, *dnsServer)
+		mtastsset, err := getMTASTS(*targetHostName, *dnsServer)
 		if err != nil {
 			log.Fatalln("ee " + err.Error())
 		}
@@ -126,7 +126,7 @@ func main() {
 		for _, port := range openPorts {
 			if port == "25" {
 				log.Println("ii Checking for open relay")
-				err, orresult := openRelay(*mailFrom, *mailTo, targetHost)
+				orresult, err := openRelay(*mailFrom, *mailTo, targetHost)
 				if err != nil {
 					log.Println("ww " + err.Error())
 				}

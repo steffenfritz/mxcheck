@@ -17,15 +17,15 @@ type mtaststxt struct {
 }
 
 //mtasts checks if mtasts is wanted and possible
-func mtasts(targetHostname string) (error, mtaststxt) {
+func mtasts(targetHostname string) (mtaststxt, error) {
 	var mtaststxt mtaststxt
 	resp, err := http.Get(mtastsprefix + targetHostname + mtastsuri)
 	if err != nil {
-		return err, mtaststxt
+		return mtaststxt, err
 	}
 
 	// NEXT
 	println(resp)
 
-	return err, mtaststxt
+	return mtaststxt, err
 }

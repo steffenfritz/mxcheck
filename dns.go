@@ -9,7 +9,7 @@ import (
 
 // getMX builds an MX record dns request and sends it to a dns server
 // It returns a single mx entry and its status
-func getMX(targetHostName *string, dnsServer string) (error, []string, bool) {
+func getMX(targetHostName *string, dnsServer string) ([]string, bool, error) {
 	// var mx string
 	var mxstatus bool
 	var mxlist []string
@@ -20,7 +20,7 @@ func getMX(targetHostName *string, dnsServer string) (error, []string, bool) {
 	c := new(dns.Client)
 	in, _, err := c.Exchange(m, dnsServer+":53")
 	if err != nil {
-		return err, mxlist, mxstatus
+		return mxlist, mxstatus, err
 	}
 
 	if len(in.Answer) == 0 {
@@ -36,13 +36,13 @@ func getMX(targetHostName *string, dnsServer string) (error, []string, bool) {
 		mxstatus = true
 	}
 
-	return err, mxlist, mxstatus
+	return mxlist, mxstatus, err
 
 }
 
 // getA builds an A record dns request and sends it to a dns server
 // It returns a single ip address
-func getA(targetHostName string, dnsServer string) (error, string) {
+func getA(targetHostName string, dnsServer string) (string, error) {
 	var a string
 
 	m := new(dns.Msg)
@@ -51,24 +51,23 @@ func getA(targetHostName string, dnsServer string) (error, string) {
 	c := new(dns.Client)
 	in, _, err := c.Exchange(m, dnsServer+":53")
 	if err != nil {
-		return err, a
+		return a, err
 	}
 
 	if len(in.Answer) == 0 {
-		// log.Fatalln("No Answer from DNS")
-		return errors.New("no answer from DNS"), a
+		return a, errors.New("no answer from DNS")
 	}
 
 	if t, ok := in.Answer[0].(*dns.A); ok {
 		a = t.A.String()
 	}
 
-	return err, a
+	return a, err
 }
 
 // getPTR builds a PTR dns request and sends it to a dns server
 // It returns a single ptr entry
-func getPTR(ipaddr string, dnsServer string) (error, string) {
+func getPTR(ipaddr string, dnsServer string) (string, error) {
 	var ptr string
 
 	ipslice := strings.Split(ipaddr, ".")
@@ -82,7 +81,7 @@ func getPTR(ipaddr string, dnsServer string) (error, string) {
 	c := new(dns.Client)
 	in, _, err := c.Exchange(m, dnsServer+":53")
 	if err != nil {
-		return err, ptr
+		return ptr, err
 	}
 
 	if len(in.Answer) == 0 {
@@ -93,12 +92,12 @@ func getPTR(ipaddr string, dnsServer string) (error, string) {
 		}
 	}
 
-	return err, ptr
+	return ptr, err
 }
 
 // getSPF builds a spf dns request and sends it to a dns server
 // It returns a bool if a spf is set and has "v=spf1"
-func getSPF(targetHostName string, dnsServer string) (error, bool, string) {
+func getSPF(targetHostName string, dnsServer string) (bool, string, error) {
 	var spf bool
 	var spfanswer string
 
@@ -109,7 +108,7 @@ func getSPF(targetHostName string, dnsServer string) (error, bool, string) {
 	c.Net = "tcp"
 	in, _, err := c.Exchange(m, dnsServer+":53")
 	if err != nil {
-		return err, spf, spfanswer
+		return spf, spfanswer, err
 	}
 
 	if len(in.Answer) != 0 {
@@ -124,12 +123,12 @@ func getSPF(targetHostName string, dnsServer string) (error, bool, string) {
 		}
 	}
 
-	return err, spf, spfanswer
+	return spf, spfanswer, err
 }
 
 // getMTASTS builds a mta-sts request and sends it to a dns server
 // It returns a bool if an mta-sts entry is set
-func getMTASTS(targetHostName string, dnsServer string) (error, bool) {
+func getMTASTS(targetHostName string, dnsServer string) (bool, error) {
 	// This prefix is the fixed subdomain for mta-sts
 	mtastsprefix := "_mta-sts."
 	var mtasts bool
@@ -141,7 +140,7 @@ func getMTASTS(targetHostName string, dnsServer string) (error, bool) {
 	c.Net = "tcp"
 	in, _, err := c.Exchange(m, dnsServer+":53")
 	if err != nil {
-		return err, mtasts
+		return mtasts, err
 	}
 
 	if len(in.Answer) != 0 {
@@ -155,5 +154,5 @@ func getMTASTS(targetHostName string, dnsServer string) (error, bool) {
 		}
 	}
 
-	return err, mtasts
+	return mtasts, err
 }
