@@ -13,6 +13,33 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
+// runresult is used to store the metadata of a single run
+type runresult struct {
+	testdate         string
+	targetdomainname string
+	dnsserver        string
+	mxhosts          []string
+	mailfrom         string
+	mailto           string
+	mxresults        []mxresult
+}
+
+// mxresult is used to store a  results in a single type for further processing
+type mxresult struct {
+	mxentry      string
+	ipaddr       string
+	ptrentry     string
+	spfset       bool
+	stsset       bool
+	ststext      string
+	openports    []string
+	fakesender   bool
+	fakercpt     bool
+	starttls     bool
+	tlscertvalid bool
+	openrelay    bool
+}
+
 func main() {
 
 	println()
@@ -36,6 +63,9 @@ func main() {
 		return
 	}
 
+	runresult := runresult{}
+
+	runresult.targetdomainname = *targetHostName
 	log.Println("ii Checking: " + *targetHostName)
 
 	targetHosts, mxstatus, err := getMX(targetHostName, *dnsServer)
@@ -45,6 +75,8 @@ func main() {
 	if mxstatus {
 		log.Println("ii Found MX: ")
 		for _, mxentry := range targetHosts {
+			// NEXT
+			runresult.mxresults = append(runresult.mxresults, mxentry)
 			log.Println("ii           " + mxentry)
 		}
 	} else {
