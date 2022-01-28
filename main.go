@@ -18,7 +18,6 @@ type runresult struct {
 	testdate         string
 	targetdomainname string
 	dnsserver        string
-	mxhosts          []string
 	mailfrom         string
 	mailto           string
 	mxresults        []mxresult
@@ -29,6 +28,7 @@ type mxresult struct {
 	mxentry      string
 	ipaddr       string
 	ptrentry     string
+	ptrmatch     bool
 	spfset       bool
 	stsset       bool
 	ststext      string
@@ -64,6 +64,10 @@ func main() {
 	}
 
 	runresult := runresult{}
+	runresult.testdate = time.Now().Format(time.RFC3339)
+	runresult.dnsserver = *dnsServer
+	runresult.mailfrom = *mailFrom
+	runresult.mailto = *mailTo
 
 	runresult.targetdomainname = *targetHostName
 	log.Println("ii Checking: " + *targetHostName)
@@ -75,8 +79,6 @@ func main() {
 	if mxstatus {
 		log.Println("ii Found MX: ")
 		for _, mxentry := range targetHosts {
-			// NEXT
-			runresult.mxresults = append(runresult.mxresults, mxentry)
 			log.Println("ii           " + mxentry)
 		}
 	} else {
@@ -99,11 +101,14 @@ func main() {
 	}
 
 	for _, targetHost := range targetHosts {
+		// Create temp mxresult to store single mx result
+		singlemx := mxresult{}
 		log.Println("ii Checking for A record")
 		ipaddr, err := getA(targetHost, *dnsServer)
 		if err != nil {
 			log.Fatalln("ee " + err.Error())
 		}
+		singlemx.ipaddr = ipaddr
 		log.Println("ii IP address MX: " + ipaddr)
 
 		log.Println("ii Checking for PTR record")
@@ -111,9 +116,11 @@ func main() {
 		if err != nil {
 			log.Fatalln("ee " + err.Error())
 		}
+		singlemx.ptrentry = ptrentry
 		log.Println("ii PTR entry: " + ptrentry)
 
 		if ptrentry == targetHost {
+			singlemx.ptrmatch = true
 			log.Println(Green("++ PTR matches MX record"))
 		} else {
 			log.Println(Red("-- PTR does not match MX record"))
@@ -125,6 +132,7 @@ func main() {
 			log.Fatalln("ee " + err.Error())
 		}
 		if spfentry {
+			singlemx.spfset = true
 			log.Println(Green("++ SPF set"))
 			if *verbose {
 				log.Println("ii " + spfanswer)
@@ -139,6 +147,7 @@ func main() {
 			log.Fatalln("ee " + err.Error())
 		}
 		if mtastsset {
+			singlemx.stsset = true
 			log.Println(Green("++ MTA-STS subdomain set"))
 			log.Println("ii Checking MTA-STS settings")
 			mtasts(*targetHostName)
@@ -154,6 +163,7 @@ func main() {
 			log.Println(Cyan("ii No open ports to connect to. Quitting."))
 			return
 		}
+		singlemx.openports = openPorts
 
 		for _, port := range openPorts {
 			if port == "25" {
@@ -164,12 +174,14 @@ func main() {
 				}
 
 				if orresult.tlsbool {
+					singlemx.starttls = true
 					log.Println(Green("++ StartTLS supported"))
 				} else {
 					log.Println("-- StartTLS not supported")
 				}
 
 				if orresult.tlsbool && orresult.tlsvalid {
+					singlemx.tlscertvalid = true
 					log.Println(Green("++ Certificate is valid"))
 				}
 
@@ -178,10 +190,12 @@ func main() {
 				}
 
 				if orresult.orboolresult {
+					singlemx.openrelay = true
 					log.Println(Red("!! Server is probably an open relay"))
 				} else {
 					log.Println(Green("++ Server is not an open relay"))
 				}
+				runresult.mxresults = append(runresult.mxresults, singlemx)
 				println()
 			}
 		}
