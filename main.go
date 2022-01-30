@@ -17,13 +17,14 @@ import (
 type runresult struct {
 	testdate         string
 	targetdomainname string
+	ststext          mtaststxt
 	dnsserver        string
 	mailfrom         string
 	mailto           string
 	mxresults        []mxresult
 }
 
-// mxresult is used to store a  results in a single type for further processing
+// mxresult is used to store a mx scan result for further processing
 type mxresult struct {
 	mxentry      string
 	ipaddr       string
@@ -31,7 +32,6 @@ type mxresult struct {
 	ptrmatch     bool
 	spfset       bool
 	stsset       bool
-	ststext      string
 	openports    []string
 	fakesender   bool
 	fakercpt     bool
@@ -51,6 +51,7 @@ func main() {
 	targetHostName := flag.StringP("service", "s", "",
 		"The service host to check")
 	verbose := flag.BoolP("version", "v", false, "version and license")
+	writetsv := flag.BoolP("write-tsv", "w", false, "Write tsv formated report to file")
 
 	flag.Parse()
 
@@ -150,7 +151,13 @@ func main() {
 			singlemx.stsset = true
 			log.Println(Green("++ MTA-STS subdomain set"))
 			log.Println("ii Checking MTA-STS settings")
-			mtasts(*targetHostName)
+			mtaststxt, err := mtasts(*targetHostName)
+			if err != nil {
+				log.Printf("ee %s", err.Error())
+			} else {
+				runresult.ststext = mtaststxt
+			}
+
 		} else {
 			log.Println(Red("-- MTA-STS not set"))
 		}
@@ -199,5 +206,12 @@ func main() {
 				println()
 			}
 		}
+	}
+	if *writetsv {
+		err := writeTSV(*targetHostName, runresult)
+		if err != nil {
+			log.Printf("ee %s", err.Error())
+		}
+
 	}
 }

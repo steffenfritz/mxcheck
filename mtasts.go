@@ -17,7 +17,7 @@ type mtaststxt struct {
 	version string
 	mode    string
 	max_age string
-	mx      string
+	mx      []string
 }
 
 //mtasts checks if mtasts is wanted and possible
@@ -29,7 +29,14 @@ func mtasts(targetHostname string) (mtaststxt, error) {
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
-	println(strings.Split(string(body), "\n"))
+
+	mtastssplit := strings.Split(string(body), "\n")
+	mtaststxt.version = mtastssplit[0]
+	mtaststxt.mode = mtastssplit[1]
+	mtaststxt.max_age = mtastssplit[2]
+	for _, mxentry := range mtastssplit[2:] {
+		mtaststxt.mx = append(mtaststxt.mx, mxentry)
+	}
 
 	return mtaststxt, err
 }
