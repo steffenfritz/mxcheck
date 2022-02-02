@@ -8,4 +8,4 @@ var license = `This program comes with ABSOLUTELY NO WARRANTY.
 This is free software under GPL-3.0, and you are welcome to 
 redistribute it under certain conditions. See license file.`
 
-var versionmsg = info + " version: " + Version + " build: " + Build + "\n\n" + license + "\n\n"
+var versionmsg = info + " version: " + Version + " build: " + Build + "\n\n" + license + "\n"

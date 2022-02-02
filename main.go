@@ -47,16 +47,17 @@ func main() {
 	dnsServer := flag.StringP("dnsserver", "d", "8.8.8.8", "The dns server to consult")
 	mailFrom := flag.StringP("mailfrom", "f", "info@foo.wtf", "Set the mailFrom address")
 	mailTo := flag.StringP("mailto", "t", "info@baz.wtf", "Set the mailTo address")
-	noprompt := flag.BoolP("no-prompt", "n", false, "answer yes to all questions")
+	noprompt := flag.BoolP("no-prompt", "n", false, "Answer yes to all questions")
 	targetHostName := flag.StringP("service", "s", "",
 		"The service host to check")
-	verbose := flag.BoolP("version", "v", false, "version and license")
+	verbose := flag.BoolP("version", "v", false, "Version and license")
 	writetsv := flag.BoolP("write-tsv", "w", false, "Write tsv formated report to file")
 
 	flag.Parse()
 
 	if *verbose {
 		println(versionmsg)
+		return
 	}
 
 	if len(*targetHostName) == 0 {
@@ -104,6 +105,8 @@ func main() {
 	for _, targetHost := range targetHosts {
 		// Create temp mxresult to store single mx result
 		singlemx := mxresult{}
+		singlemx.mxentry = targetHost
+
 		log.Println("ii Checking for A record")
 		ipaddr, err := getA(targetHost, *dnsServer)
 		if err != nil {
