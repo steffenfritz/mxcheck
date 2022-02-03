@@ -8,7 +8,7 @@ import (
 )
 
 // getMX builds an MX record dns request and sends it to a dns server
-// It returns a single mx entry and its status
+// It returns a mx entry list, if at least one mx record was found and an error
 func getMX(targetHostName *string, dnsServer string) ([]string, bool, error) {
 	// var mx string
 	var mxstatus bool
@@ -41,7 +41,7 @@ func getMX(targetHostName *string, dnsServer string) ([]string, bool, error) {
 }
 
 // getA builds an A record dns request and sends it to a dns server
-// It returns a single ip address
+// It returns a single ip address and an error
 func getA(targetHostName string, dnsServer string) (string, error) {
 	var a string
 
@@ -66,7 +66,7 @@ func getA(targetHostName string, dnsServer string) (string, error) {
 }
 
 // getPTR builds a PTR dns request and sends it to a dns server
-// It returns a single ptr entry
+// It returns a single ptr entry and an error
 func getPTR(ipaddr string, dnsServer string) (string, error) {
 	var ptr string
 
@@ -96,7 +96,7 @@ func getPTR(ipaddr string, dnsServer string) (string, error) {
 }
 
 // getSPF builds a spf dns request and sends it to a dns server
-// It returns a bool if a spf is set and has "v=spf1"
+// It returns a bool if a spf is set, the value of it and an error
 func getSPF(targetHostName string, dnsServer string) (bool, string, error) {
 	var spf bool
 	var spfanswer string
@@ -127,7 +127,7 @@ func getSPF(targetHostName string, dnsServer string) (bool, string, error) {
 }
 
 // getMTASTS builds a mta-sts request and sends it to a dns server
-// It returns a bool if an mta-sts entry is set
+// It returns a bool if an mta-sts entry is set and an error
 func getMTASTS(targetHostName string, dnsServer string) (bool, error) {
 	// This prefix is the fixed subdomain for mta-sts
 	mtastsprefix := "_mta-sts."
