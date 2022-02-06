@@ -1,0 +1,59 @@
+.\" Copyright (c) 2019-2022, Steffen Fritz
+.\"
+.\" %%%LICENSE_START(GPLv2+_DOC_FULL)
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, see
+.\" <http://www.gnu.org/licenses/>.
+.\" %%%LICENSE_END
+
+.TH mxcheck 1 "February 2021" "version 1.2.1"
+.SH NAME
+mxcheck
+.SH SYNOPSIS
+.B mxcheck [OPTION]
+.SH DESCRIPTION
+mxcheck is an info scanner for e-mail servers. It checks the following DNS records: A, MX, PTR, SPF and MTA-STS.
+It also checks for StartTLS support and the validity of the certificate.
+After scanning the tcp ports 25, 465 and 587 mxcheck checks if the e-mail server is an open relay by trying to send a single message.
+
+.SH FLAGS
+mxcheck  
+
+.BR \-d,\ --dnsserver\fR
+    The dns server to consult (default "8.8.8.8")
+
+.BR \-f,\ --mailfrom\fR
+    Set the mailFrom address (default "info@foo.wtf")
+
+.BR \-n,\ --no-prompt\fR
+    Answer yes to all questions
+
+.BR \-s,\ --service\fR
+    The service to check. This is a mandatory flag and must be a domain name.
+
+.BR \-t,\ --mailto\fR
+    Set the mailTo address (default "info@baz.wtf")
+
+.BR \-v,\ --version\fR
+    Print the version and build and a license notice.
+
+.BR \-w,\ --write-tsv\fR
+    Write tsv formated report to file. Its name is fixed to target host, an RFC3339 timestamp and a tsv suffix.
+
+.SH AUTHOR
+Steffen Fritz <steffen@fritz.wtf>
