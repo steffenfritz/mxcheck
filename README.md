@@ -29,9 +29,14 @@ v1.2.1-RC1
 
 # Installation
 
-    go get github.com/steffenfritz/mxcheck
-
+    
+    go get github.com/steffenfritz/mxcheck (deprecated since go 1.17)
+    
 or 
+
+    go install github.com/steffenfritz/mxcheck
+    
+or
 
     download a pre-compiled binary.
 
