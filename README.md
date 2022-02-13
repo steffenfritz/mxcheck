@@ -3,10 +3,10 @@
 mxcheck is an info scanner for mail servers
 
 It checks 
-  1. DNS records: A, MX, PTR, SPF, MTA-STS
-  2. for support of StartTLS and the certificate
-  3. open ports: 25, 465, 587
-  4. and if the server is an open relay
+  * DNS records: A, MX, PTR, SPF, MTA-STS
+  * for support of StartTLS and the certificate
+  * open ports: 25, 465, 587
+  * and if the server is an open relay
 
 You can set mailFrom, mailTo, the DNS server and output a report in tsv format.
 
@@ -18,6 +18,11 @@ You can set mailFrom, mailTo, the DNS server and output a report in tsv format.
     -s, --service string     The service host to check (default "localhost")
     -v, --version            Version and license
     -w, --write-tsv          Write tsv formated report to file
+    
+    
+# Example
+
+[![asciicast](https://asciinema.org/a/XV1fGehut6aL4PimPqS5Ox2pv.svg)](https://asciinema.org/a/XV1fGehut6aL4PimPqS5Ox2pv)
 
 
 # Version
