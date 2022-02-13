@@ -45,7 +45,7 @@ or
     ./mxcheck -s 2600.com
     ./mxcheck -s 2600.com -v
     ./mxcheck -s 2600.com -v -d 8.8.8.8
-    ./mxcheck -s 2600.com -v -n -f info@baz.com -t boss@foo.org -v -w
+    ./mxcheck -s 2600.com -v -n -f info@baz.com -t boss@foo.org -w
 
 There is no check whether the server needs authentication. However, you can do two runs:
 
