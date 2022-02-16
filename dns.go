@@ -126,7 +126,7 @@ func getSPF(targetHostName string, dnsServer string) (bool, string, error) {
 	return spf, spfanswer, err
 }
 
-// getMTASTS builds a mta-sts request and sends it to a dns server
+// getMTASTS builds a TXT request and sends it to a dns server
 // It returns a bool if an mta-sts entry is set and an error
 func getMTASTS(targetHostName string, dnsServer string) (bool, error) {
 	// This prefix is the fixed subdomain for mta-sts
@@ -155,4 +155,65 @@ func getMTASTS(targetHostName string, dnsServer string) (bool, error) {
 	}
 
 	return mtasts, err
+}
+
+// getDKIM builds a TXT request and sends it to a dns server
+// It returns a bool if an mta-sts entry is set and an error
+func getDKIM(selector string, targetHostName string, dnsServer string) (dkim, error) {
+	// This infix is a fixed domain part for dkim
+	dkiminfix := "_domainkey."
+	var dkim dkim
+	dkim.domain = selector + "." + dkiminfix + targetHostName
+
+	m := new(dns.Msg)
+	m.SetQuestion(dns.Fqdn(dkim.domain), dns.TypeTXT)
+
+	c := new(dns.Client)
+	c.Net = "tcp"
+	in, _, err := c.Exchange(m, dnsServer+":53")
+	if err != nil {
+		return dkim, err
+	}
+
+	if len(in.Answer) != 0 {
+		for n := range in.Answer {
+			t := *in.Answer[n].(*dns.TXT)
+			for _, v := range t.Txt {
+				if strings.HasPrefix(v, "v=DKIM1") {
+					dkimSplit := strings.Fields(v)
+					dkim.dkimset = true
+					dkim.selector = selector
+					dkim.version = "1"
+					for _, partDKIM := range dkimSplit {
+						if strings.HasPrefix(partDKIM, "g=") {
+							dkim.granularity = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
+							continue
+						}
+						if strings.HasPrefix(partDKIM, "h=") {
+							dkim.accepAlgo = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
+							continue
+						}
+						if strings.HasPrefix(partDKIM, "k=") {
+							dkim.keyType = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
+							continue
+						}
+						if strings.HasPrefix(partDKIM, "n=") {
+							dkim.noteField = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
+							continue
+						}
+						if strings.HasPrefix(partDKIM, "p=") {
+							dkim.publicKey = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
+							continue
+						}
+						if strings.HasPrefix(partDKIM, "t=") {
+							dkim.testing = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
+							continue
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return dkim, err
 }

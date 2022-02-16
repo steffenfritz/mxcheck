@@ -22,6 +22,7 @@ type runresult struct {
 	mailfrom         string
 	mailto           string
 	mxresults        []mxresult
+	dkimresult       dkim
 }
 
 // mxresult is used to store a mx scan result for further processing
@@ -44,6 +45,8 @@ func main() {
 
 	println()
 
+	dkimSelector := flag.StringP("dkim-selector", "S", "",
+		"The DKIM selector. If set a dkim check is performed on the provided service domain.")
 	dnsServer := flag.StringP("dnsserver", "d", "8.8.8.8", "The dns server to consult")
 	mailFrom := flag.StringP("mailfrom", "f", "info@foo.wtf", "Set the mailFrom address")
 	mailTo := flag.StringP("mailto", "t", "info@baz.wtf", "Set the mailTo address")
@@ -99,6 +102,32 @@ func main() {
 		if response != "y" {
 			log.Println("ii User terminated. Bye.")
 			return
+		}
+	}
+
+	if len(*dkimSelector) > 0 {
+		log.Println("ii Checking DKIM record")
+		runresult.dkimresult, err = getDKIM(*dkimSelector, *targetHostName, *dnsServer)
+		if err != nil {
+			log.Printf("ee %s", err.Error())
+		} else {
+			if runresult.dkimresult.dkimset {
+				log.Println("ii DKIM Domain " + runresult.dkimresult.domain)
+				log.Println("ii DKIM Version " + runresult.dkimresult.version)
+				log.Println("ii DKIM Key Type " + runresult.dkimresult.keyType)
+				if len(runresult.dkimresult.accepAlgo) > 0 {
+					log.Println("ii DKIM Accepted Algorithms " + runresult.dkimresult.accepAlgo)
+				} else {
+					log.Println("ii DKIM Accepted Algorithms not set")
+				}
+				if len(runresult.dkimresult.noteField) > 0 {
+					log.Println("ii DKIM  Note " + runresult.dkimresult.noteField)
+				} else {
+					log.Println("ii DKIM No note set")
+				}
+			} else {
+				log.Println("ii DKIM not set or wrong selector")
+			}
 		}
 	}
 
