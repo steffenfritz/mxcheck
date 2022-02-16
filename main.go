@@ -46,7 +46,7 @@ func main() {
 	println()
 
 	dkimSelector := flag.StringP("dkim-selector", "S", "",
-		"The DKIM selector. If set a dkim check is performed on the provided service domain.")
+		"The DKIM selector. If set a DKIM check is performed on the provided service domain")
 	dnsServer := flag.StringP("dnsserver", "d", "8.8.8.8", "The dns server to consult")
 	mailFrom := flag.StringP("mailfrom", "f", "info@foo.wtf", "Set the mailFrom address")
 	mailTo := flag.StringP("mailto", "t", "info@baz.wtf", "Set the mailTo address")

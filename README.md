@@ -16,6 +16,7 @@ You can set mailFrom, mailTo, the DNS server and output a report in tsv format.
     -t, --mailto string      Set the mailTo address (default "info@baz.wtf")
     -n, --no-prompt          Answer yes to all questions
     -s, --service string     The service host to check (default "localhost")
+    -S, --dkim-selector      The DKIM selector. If set a dkim check is performed on the provided service domain
     -v, --version            Version and license
     -w, --write-tsv          Write tsv formated report to file
     
@@ -50,7 +51,7 @@ or
     ./mxcheck -s 2600.com
     ./mxcheck -s 2600.com -v
     ./mxcheck -s 2600.com -v -d 8.8.8.8
-    ./mxcheck -s 2600.com -v -n -f info@baz.com -t boss@foo.org -w
+    ./mxcheck -s 2600.com -v -n -f info@baz.com -t boss@foo.org -w -S default
 
 There is no check whether the server needs authentication. However, you can do two runs:
 
