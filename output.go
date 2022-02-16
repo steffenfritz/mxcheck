@@ -26,6 +26,18 @@ func writeTSV(targetHostName string, runresult runresult) error {
 	err = tsv.Write([]string{"DNS Server", runresult.dnsserver})
 	err = tsv.Write([]string{"MailFrom", runresult.mailfrom})
 	err = tsv.Write([]string{"MailTo", runresult.mailto})
+	if !runresult.dkimresult.dkimset {
+		err = tsv.Write([]string{"DKIM Set", "false"})
+	} else {
+		err = tsv.Write([]string{"DKIM Set", "true"})
+		err = tsv.Write([]string{"DKIM DNS Entry", runresult.dkimresult.domain})
+		err = tsv.Write([]string{"DKIM DNS Version", runresult.dkimresult.version})
+		err = tsv.Write([]string{"DKIM Key Type", runresult.dkimresult.keyType})
+		err = tsv.Write([]string{"DKIM Accepted Algorithm", runresult.dkimresult.accepAlgo})
+		err = tsv.Write([]string{"DKIM Granularity", runresult.dkimresult.granularity})
+		err = tsv.Write([]string{"DKIM Note", runresult.dkimresult.noteField})
+		err = tsv.Write([]string{"DKIM Public Key", runresult.dkimresult.publicKey})
+	}
 
 	for i, mxentry := range runresult.mxresults {
 		err = tsv.Write([]string{"MX Entry Seq Number ", strconv.Itoa(i)})
