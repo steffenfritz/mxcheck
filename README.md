@@ -1,9 +1,9 @@
 # mxcheck
 
-mxcheck is an info scanner for mail servers
+mxcheck is an info scanner for e-mail servers
 
 It checks 
-  * DNS records: A, MX, PTR, SPF, MTA-STS
+  * DNS records: A, MX, PTR, SPF, MTA-STS, DKIM
   * for support of StartTLS and the certificate
   * open ports: 25, 465, 587
   * and if the server is an open relay
@@ -28,10 +28,11 @@ You can set mailFrom, mailTo, the DNS server and output a report in tsv format.
 
 # Version
 
-v1.2.1-RC1
+v1.2.2
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/steffenfritz/mxcheck)](https://goreportcard.com/report/github.com/steffenfritz/mxcheck) 
-
+[![Go Reference](https://pkg.go.dev/badge/github.com/steffenfritz/mxcheck.svg)](https://pkg.go.dev/github.com/steffenfritz/mxcheck)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 # Installation
 
