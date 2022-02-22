@@ -20,10 +20,6 @@ You can set mailFrom, mailTo, the DNS server and output a report in tsv format.
     -v, --version            Version and license
     -w, --write-tsv          Write tsv formated report to file
     
-    
-# Example
-
-[![asciicast](https://asciinema.org/a/XV1fGehut6aL4PimPqS5Ox2pv.svg)](https://asciinema.org/a/XV1fGehut6aL4PimPqS5Ox2pv)
 
 
 # Version
