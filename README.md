@@ -49,6 +49,9 @@ or
     ./mxcheck -s 2600.com -v
     ./mxcheck -s 2600.com -v -d 8.8.8.8
     ./mxcheck -s 2600.com -v -n -f info@baz.com -t boss@foo.org -w -S default
+    
+   [![asciicast](https://asciinema.org/a/471229.svg)](https://asciinema.org/a/471229)
+    
 
 There is no check whether the server needs authentication. However, you can do two runs:
 
