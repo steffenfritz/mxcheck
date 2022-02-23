@@ -1,6 +1,6 @@
 # mxcheck
 
-mxcheck is an info scanner for e-mail servers
+mxcheck is an info scanner for e-mail servers.
 
 It checks 
   * DNS records: A, MX, PTR, SPF, MTA-STS, DKIM
