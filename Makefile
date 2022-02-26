@@ -3,7 +3,7 @@ ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 BINARY=mxcheck
 VERSION=1.2.2
 BUILD=`git rev-parse --short HEAD`
-PLATFORMS=darwin linux windows freebsd
+PLATFORMS=darwin linux windows
 ARCHITECTURES=amd64
 
 LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.Build=${BUILD} -w -s" 
@@ -23,7 +23,6 @@ build_all:
 	rm mxcheck
 	mv mxcheck-windows mxcheck && tar cvfz mxcheck_win_$(VERSION).tar.gz mxcheck
 	rm mxcheck
-
 
 clean:
 	rm -f '${BINARY}-linux'

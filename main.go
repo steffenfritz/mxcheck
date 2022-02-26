@@ -149,6 +149,7 @@ func main() {
 		if err != nil {
 			log.Fatalln("ee " + err.Error())
 		}
+
 		singlemx.ptrentry = ptrentry
 		log.Println("ii PTR entry: " + ptrentry)
 
