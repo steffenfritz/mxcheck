@@ -200,7 +200,7 @@ func main() {
 
 		if len(openPorts) == 0 {
 			log.Println(Cyan("ii No open ports to connect to. Quitting."))
-			return
+			continue
 		}
 		singlemx.openports = openPorts
 
