@@ -24,7 +24,7 @@ You can set mailFrom, mailTo, the DNS server and output a report in tsv format.
 
 # Version
 
-v1.2.2
+v1.2.3
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/steffenfritz/mxcheck)](https://goreportcard.com/report/github.com/steffenfritz/mxcheck) 
 [![Go Reference](https://pkg.go.dev/badge/github.com/steffenfritz/mxcheck.svg)](https://pkg.go.dev/github.com/steffenfritz/mxcheck)
