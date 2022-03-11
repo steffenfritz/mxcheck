@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// NewTSVWriter returns a new TSV writer used in writeTSV()
 func NewTSVWriter(w io.Writer) (writer *csv.Writer) {
 	writer = csv.NewWriter(w)
 	writer.Comma = '\t'
