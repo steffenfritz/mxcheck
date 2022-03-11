@@ -21,13 +21,13 @@
 .\" <http://www.gnu.org/licenses/>.
 .\" %%%LICENSE_END
 
-.TH mxcheck 1 "February 2021" "version 1.2.1"
+.TH mxcheck 1 "February 2022" "version 1.2.4"
 .SH NAME
 mxcheck
 .SH SYNOPSIS
 .B mxcheck [OPTION]
 .SH DESCRIPTION
-mxcheck is an info scanner for e-mail servers. It checks the following DNS records: A, MX, PTR, SPF and MTA-STS.
+mxcheck is an info scanner for e-mail servers. It checks the following DNS records: A, MX, PTR, SPF, MTA-STS and DKIM.
 It also checks for StartTLS support and the validity of the certificate.
 After scanning the tcp ports 25, 465 and 587 mxcheck checks if the e-mail server is an open relay by trying to send a single message.
 

@@ -15,9 +15,9 @@ var mtastsprefix = "https://mta-sts."
 // mtsststxt is a struct for the contents of a mta-sts.txt file
 type mtaststxt struct {
 	version string
-	mode    string
-	max_age string
-	mx      []string
+	mode   string
+	maxAge string
+	mx     []string
 }
 
 //mtasts checks if mtasts is wanted and possible
@@ -33,7 +33,7 @@ func mtasts(targetHostname string) (mtaststxt, error) {
 	mtastssplit := strings.Split(string(body), "\n")
 	mtaststxt.version = mtastssplit[0]
 	mtaststxt.mode = mtastssplit[1]
-	mtaststxt.max_age = mtastssplit[2]
+	mtaststxt.maxAge = mtastssplit[2]
 	for _, mxentry := range mtastssplit[2:] {
 		mtaststxt.mx = append(mtaststxt.mx, mxentry)
 	}

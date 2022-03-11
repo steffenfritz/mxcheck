@@ -43,6 +43,7 @@ func writeTSV(targetHostName string, runresult runresult) error {
 		err = tsv.Write([]string{"MX Entry Seq Number ", strconv.Itoa(i)})
 		err = tsv.Write([]string{"MX Entry DNS", mxentry.mxentry})
 		err = tsv.Write([]string{"IP Address", mxentry.ipaddr})
+		err = tsv.Write([]string{"Server string", mxentry.serverstring})
 		portlist := ""
 		for _, port := range mxentry.openports {
 			portlist += port + " "
