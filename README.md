@@ -1,6 +1,6 @@
 # mxcheck
 
-mxcheck is an info scanner for e-mail servers
+mxcheck is an info scanner for e-mail servers.
 
 It checks 
   * DNS records: A, MX, PTR, SPF, MTA-STS, DKIM
@@ -20,19 +20,16 @@ You can set mailFrom, mailTo, the DNS server and output a report in tsv format.
     -v, --version            Version and license
     -w, --write-tsv          Write tsv formated report to file
     
-    
-# Example
-
-[![asciicast](https://asciinema.org/a/XV1fGehut6aL4PimPqS5Ox2pv.svg)](https://asciinema.org/a/XV1fGehut6aL4PimPqS5Ox2pv)
 
 
 # Version
 
-v1.2.2
+v1.2.3
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/steffenfritz/mxcheck)](https://goreportcard.com/report/github.com/steffenfritz/mxcheck) 
 [![Go Reference](https://pkg.go.dev/badge/github.com/steffenfritz/mxcheck.svg)](https://pkg.go.dev/github.com/steffenfritz/mxcheck)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Build status](https://ci.appveyor.com/api/projects/status/l6d32n4ax02f6ku2?svg=true)](https://ci.appveyor.com/project/steffenfritz/mxcheck)
 
 # Installation
 
@@ -53,6 +50,9 @@ or
     ./mxcheck -s 2600.com -v
     ./mxcheck -s 2600.com -v -d 8.8.8.8
     ./mxcheck -s 2600.com -v -n -f info@baz.com -t boss@foo.org -w -S default
+    
+   [![asciicast](https://asciinema.org/a/471229.svg)](https://asciinema.org/a/471229)
+    
 
 There is no check whether the server needs authentication. However, you can do two runs:
 
