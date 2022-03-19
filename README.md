@@ -11,7 +11,7 @@ It checks
 You can set mailFrom, mailTo, the DNS server and output a report in tsv format.
 
 
-    -d, --dnsserver string   The dns server to consult (default "8.8.8.8")
+    -d, --dnsserver string   The dns server to be requested (default "8.8.8.8")
     -f, --mailfrom string    Set the mailFrom address (default "info@foo.wtf")
     -t, --mailto string      Set the mailTo address (default "info@baz.wtf")
     -n, --no-prompt          Answer yes to all questions
