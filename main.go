@@ -31,6 +31,7 @@ type mxresult struct {
 	ipaddr       string
 	ptrentry     string
 	ptrmatch     bool
+	serverstring string
 	spfset       bool
 	stsset       bool
 	openports    []string
@@ -149,6 +150,7 @@ func main() {
 		if err != nil {
 			log.Fatalln("ee " + err.Error())
 		}
+
 		singlemx.ptrentry = ptrentry
 		log.Println("ii PTR entry: " + ptrentry)
 
@@ -210,6 +212,11 @@ func main() {
 				orresult, err := openRelay(*mailFrom, *mailTo, targetHost)
 				if err != nil {
 					log.Println("ww " + err.Error())
+				}
+
+				if len(orresult.serverstring) > 0 {
+					log.Printf("ii Server Banner: %s", orresult.serverstring)
+					singlemx.serverstring = strings.ReplaceAll(orresult.serverstring, "\r\n", "")
 				}
 
 				if orresult.tlsbool {

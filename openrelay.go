@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"crypto/tls"
 	"fmt"
 	"log"
+	"net"
 	"net/smtp"
+	"time"
 )
 
 type openResult struct {
@@ -14,6 +17,7 @@ type openResult struct {
 	rcptboolresult   bool
 	senderresult     string
 	senderboolresult bool
+	serverstring     string
 	tlsbool          bool
 	tlsvalid         bool
 }
@@ -28,6 +32,21 @@ func openRelay(mailFrom string, mailTo string, targetHost string) (openResult, e
 	c, err := smtp.Dial(targetHost + ":25")
 	if err != nil {
 		return or, err
+	}
+
+	// Print server string. You can trust the server string, but you shouldn't...
+	conn, err := net.DialTimeout("tcp", targetHost+":25", 15*time.Second)
+	defer conn.Close()
+
+	if err != nil {
+		log.Printf("ww Could not read banner: %s", err.Error())
+	} else {
+		buf := bufio.NewReader(conn)
+		bannerbytes, err := buf.ReadBytes('\n')
+		if err != nil {
+			log.Fatalf("ee Fatal error: %s", err.Error())
+		}
+		or.serverstring = string(bannerbytes)
 	}
 
 	// set default TLS config
@@ -82,6 +101,7 @@ func openRelay(mailFrom string, mailTo string, targetHost string) (openResult, e
 	if err != nil {
 		return or, err
 	}
+	defer wc.Close()
 
 	// Write test message, close and quit
 	// If we can write the message to wc we
@@ -93,10 +113,8 @@ func openRelay(mailFrom string, mailTo string, targetHost string) (openResult, e
 	} else {
 		or.orboolresult = true
 	}
+
 	err = c.Quit()
-	if err != nil {
-		return or, err
-	}
 
 	return or, err
 }
