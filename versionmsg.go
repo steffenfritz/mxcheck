@@ -3,8 +3,10 @@ package main
 // Version is used by the Makefile to set the version
 var Version string
 
-// Build is used by the Makefile to set the build number, i.e. git hash
+
+// Build is used by the Makefile to set the build, i.e. short git fingerprint
 var Build string
+
 var info = "mxcheck --  Copyright (C) 2019-2022  Steffen Fritz -- "
 
 var license = `This program comes with ABSOLUTELY NO WARRANTY.

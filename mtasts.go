@@ -15,9 +15,9 @@ var mtastsprefix = "https://mta-sts."
 // mtsststxt is a struct for the contents of a mta-sts.txt file
 type mtaststxt struct {
 	version string
-	mode   string
-	maxAge string
-	mx     []string
+	mode    string
+	maxAge  string
+	mx      []string
 }
 
 //mtasts checks if mtasts is wanted and possible
