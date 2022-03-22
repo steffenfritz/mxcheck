@@ -8,7 +8,7 @@ It checks
   * open ports: 25, 465, 587
   * and if the server is an open relay
 
-You can set mailFrom, mailTo, the DNS server and output a report in tsv format.
+You can set mailFrom, mailTo, the DNS server, DKIM selector and output a report in tsv format.
 
 
     -d, --dnsserver string   The dns server to be requested (default "8.8.8.8")
@@ -24,7 +24,7 @@ You can set mailFrom, mailTo, the DNS server and output a report in tsv format.
 
 # Version
 
-v1.2.3
+v1.2.4
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/steffenfritz/mxcheck)](https://goreportcard.com/report/github.com/steffenfritz/mxcheck) 
 [![Go Reference](https://pkg.go.dev/badge/github.com/steffenfritz/mxcheck.svg)](https://pkg.go.dev/github.com/steffenfritz/mxcheck)
@@ -33,10 +33,6 @@ v1.2.3
 
 # Installation
 
-    
-    go get github.com/steffenfritz/mxcheck (deprecated since go 1.17)
-    
-or 
 
     go install github.com/steffenfritz/mxcheck
     
