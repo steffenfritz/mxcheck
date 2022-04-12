@@ -31,6 +31,7 @@ v1.2.4
 [![Go Reference](https://pkg.go.dev/badge/github.com/steffenfritz/mxcheck.svg)](https://pkg.go.dev/github.com/steffenfritz/mxcheck)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Build status](https://ci.appveyor.com/api/projects/status/l6d32n4ax02f6ku2?svg=true)](https://ci.appveyor.com/project/steffenfritz/mxcheck)
+[![Reviewed by Hound](https://img.shields.io/badge/Reviewed_by-Hound-8E64B0.svg)](https://houndci.com)
 
 # Installation
 
