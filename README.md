@@ -8,7 +8,7 @@ It checks
   * open ports: 25, 465, 587
   * and if the server is an open relay
 
-You can set mailFrom, mailTo, the DNS server and output a report in tsv format.
+You can set mailFrom, mailTo, the DNS server, DKIM selector and output a report in tsv format.
 
 
     -d, --dnsserver string   The dns server to be requested (default "8.8.8.8")
