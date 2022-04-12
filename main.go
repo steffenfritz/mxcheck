@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -29,6 +30,8 @@ type runresult struct {
 type mxresult struct {
 	mxentry      string
 	ipaddr       string
+	asnum        int
+	ascountry    string
 	ptrentry     string
 	ptrmatch     bool
 	serverstring string
@@ -145,6 +148,18 @@ func main() {
 		singlemx.ipaddr = ipaddr
 		log.Println("ii IP address MX: " + ipaddr)
 
+		// ASN lookup
+		asn, err := getASN(ipaddr)
+		if err != nil {
+			log.Println("ee " + err.Error())
+		} else {
+			singlemx.asnum = int(asn.ASNum)
+			singlemx.ascountry = asn.Country
+			log.Println("ii AS Number: " + strconv.Itoa(singlemx.asnum))
+			log.Println("ii AS Country: " + singlemx.ascountry)
+		}
+
+		// PTR lookup
 		log.Println("ii Checking for PTR record")
 		ptrentry, err := getPTR(ipaddr, *dnsServer)
 		if err != nil {
@@ -161,6 +176,7 @@ func main() {
 			log.Println(Red("-- PTR does not match MX record"))
 		}
 
+		// SPF lookup
 		log.Println("ii Checking for SPF record")
 		spfentry, spfanswer, err := getSPF(*targetHostName, *dnsServer)
 		if err != nil {
@@ -176,6 +192,7 @@ func main() {
 			log.Println(Red("-- No SPF set"))
 		}
 
+		// MTA-STS lookup
 		log.Println("ii Checking for MTA-STS")
 		mtastsset, err := getMTASTS(*targetHostName, *dnsServer)
 		if err != nil {
@@ -196,7 +213,8 @@ func main() {
 			log.Println(Red("-- MTA-STS not set"))
 		}
 
-		log.Println("ii Checking for open mail ports")
+		// Checking for open e-mail ports
+		log.Println("ii Checking for open e-mail ports")
 		openPorts := portScan(targetHost)
 		log.Print("ii Open ports: ", openPorts)
 
@@ -246,6 +264,8 @@ func main() {
 			}
 		}
 	}
+
+	// Output to tsv file
 	if *writetsv {
 		err := writeTSV(*targetHostName, runresult)
 		if err != nil {
