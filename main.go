@@ -246,8 +246,8 @@ func main() {
 					singlemx.serverstring = strings.ReplaceAll(orresult.serverstring, "\r\n", "")
 				}
 
+				singlemx.starttls = orresult.tlsbool
 				if orresult.tlsbool {
-					singlemx.starttls = true
 					InfoLogger.Println(Green("StartTLS supported"))
 				} else {
 					InfoLogger.Println(Cyan("StartTLS not supported"))
@@ -260,6 +260,19 @@ func main() {
 
 				if orresult.tlsbool && !orresult.tlsvalid {
 					InfoLogger.Println(Red("Certificate not valid"))
+				}
+
+				singlemx.fakesender = orresult.senderboolresult
+				if orresult.senderboolresult {
+					InfoLogger.Println("Fake sender accepted.")
+				} else {
+					InfoLogger.Println("Fake sender not accepted.")
+				}
+
+				if orresult.rcptboolresult {
+					InfoLogger.Println("Recipient accepted.")
+				} else {
+					InfoLogger.Println("Recipient not accepted. Skipped further open relay tests.")
 				}
 
 				if orresult.orboolresult {
