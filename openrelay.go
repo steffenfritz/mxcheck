@@ -39,7 +39,7 @@ func openRelay(mailFrom string, mailTo string, targetHost string) (openResult, e
 	defer conn.Close()
 
 	if err != nil {
-		log.Printf("ww Could not read banner: %s", err.Error())
+		or.serverstring = "Could not read banner: " + err.Error()
 	} else {
 		buf := bufio.NewReader(conn)
 		bannerbytes, err := buf.ReadBytes('\n')
@@ -75,12 +75,6 @@ func openRelay(mailFrom string, mailTo string, targetHost string) (openResult, e
 		or.senderboolresult = true
 	}
 
-	if or.senderboolresult {
-		log.Println("ii Fake sender accepted.")
-	} else {
-		log.Println("ww Fake sender not accepted.")
-	}
-
 	// Set recipient value
 	err = c.Rcpt(mailTo)
 	if err != nil {
@@ -89,10 +83,7 @@ func openRelay(mailFrom string, mailTo string, targetHost string) (openResult, e
 		or.rcptboolresult = true
 	}
 
-	if or.rcptboolresult {
-		log.Println("ii Recipient accepted.")
-	} else {
-		log.Println("ii Recipient not accepted. Skipping further open relay tests.")
+	if !or.rcptboolresult {
 		return or, nil
 	}
 

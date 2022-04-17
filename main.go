@@ -45,6 +45,18 @@ type mxresult struct {
 	openrelay    bool
 }
 
+var (
+	WarningLogger *log.Logger
+	InfoLogger    *log.Logger
+	ErrorLogger   *log.Logger
+)
+
+func init() {
+	InfoLogger = log.New(os.Stdout, "INFO:  ", log.Ldate|log.Ltime)
+	WarningLogger = log.New(os.Stdout, "WARN:  ", log.Ldate|log.Ltime)
+	ErrorLogger = log.New(os.Stdout, "ERROR: ", log.Ldate|log.Ltime)
+}
+
 func main() {
 
 	println()
@@ -57,18 +69,18 @@ func main() {
 	noprompt := flag.BoolP("no-prompt", "n", false, "Answer yes to all questions")
 	targetHostName := flag.StringP("service", "s", "",
 		"The service host to check")
-	verbose := flag.BoolP("version", "v", false, "Version and license")
+	version := flag.BoolP("version", "v", false, "Version and license")
 	writetsv := flag.BoolP("write-tsv", "w", false, "Write tsv formated report to file")
 
 	flag.Parse()
 
-	if *verbose {
-		println(versionmsg)
+	if *version {
+		fmt.Println(versionmsg)
 		return
 	}
 
 	if len(*targetHostName) == 0 {
-		log.Println("ee The service flag is mandatory.")
+		ErrorLogger.Println("The service flag is mandatory.")
 		return
 	}
 
@@ -79,58 +91,57 @@ func main() {
 	runresult.mailto = *mailTo
 
 	runresult.targetdomainname = *targetHostName
-	log.Println("ii Checking: " + *targetHostName)
+	InfoLogger.Println("Checking: " + *targetHostName)
 
 	targetHosts, mxstatus, err := getMX(targetHostName, *dnsServer)
 	if err != nil {
-		log.Fatalln(err)
+		ErrorLogger.Fatalln(err)
 	}
 	if mxstatus {
-		log.Println("ii Found MX: ")
+		InfoLogger.Println("Found MX: ")
 		for _, mxentry := range targetHosts {
-			log.Println("ii           " + mxentry)
+			InfoLogger.Println("ii           " + mxentry)
 		}
 	} else {
-		log.Println("ww No MX entry found. Using Target Host Name.")
+		WarningLogger.Println("No MX entry found. Using Target Host Name.")
 	}
 
 	if !*noprompt {
 		reader := bufio.NewReader(os.Stdin)
-		logfixingdate := time.Now().Format("2006/01/02 15:04:05")
-		fmt.Print(logfixingdate + " ii Continue [y/n]: ")
+		InfoLogger.Print("Continue [y/n]: ")
 		response, err := reader.ReadString('\n')
 		if err != nil {
-			log.Fatal(err)
+			ErrorLogger.Fatal(err)
 		}
 		response = strings.ToLower(strings.TrimSpace(response))
 		if response != "y" {
-			log.Println("ii User terminated. Bye.")
+			InfoLogger.Println("ii User terminated. Bye.")
 			return
 		}
 	}
 
 	if len(*dkimSelector) > 0 {
-		log.Println("ii Checking DKIM record")
+		InfoLogger.Println("Checking DKIM record")
 		runresult.dkimresult, err = getDKIM(*dkimSelector, *targetHostName, *dnsServer)
 		if err != nil {
-			log.Printf("ee %s", err.Error())
+			ErrorLogger.Printf("%s", err.Error())
 		} else {
 			if runresult.dkimresult.dkimset {
-				log.Println("ii DKIM Domain " + runresult.dkimresult.domain)
-				log.Println("ii DKIM Version " + runresult.dkimresult.version)
-				log.Println("ii DKIM Key Type " + runresult.dkimresult.keyType)
+				InfoLogger.Println("DKIM Domain " + runresult.dkimresult.domain)
+				InfoLogger.Println("DKIM Version " + runresult.dkimresult.version)
+				InfoLogger.Println("DKIM Key Type " + runresult.dkimresult.keyType)
 				if len(runresult.dkimresult.accepAlgo) > 0 {
-					log.Println("ii DKIM Accepted Algorithms " + runresult.dkimresult.accepAlgo)
+					InfoLogger.Println("DKIM Accepted Algorithms " + runresult.dkimresult.accepAlgo)
 				} else {
-					log.Println("ii DKIM Accepted Algorithms not set")
+					InfoLogger.Println("DKIM Accepted Algorithms not set")
 				}
 				if len(runresult.dkimresult.noteField) > 0 {
-					log.Println("ii DKIM  Note " + runresult.dkimresult.noteField)
+					InfoLogger.Println("DKIM  Note " + runresult.dkimresult.noteField)
 				} else {
-					log.Println("ii DKIM No note set")
+					InfoLogger.Println("DKIM No note set")
 				}
 			} else {
-				log.Println("ii DKIM not set or wrong selector")
+				InfoLogger.Println("DKIM not set or wrong selector")
 			}
 		}
 	}
@@ -140,124 +151,135 @@ func main() {
 		singlemx := mxresult{}
 		singlemx.mxentry = targetHost
 
-		log.Println("ii Checking for A record")
+		InfoLogger.Println("Checking for A record")
 		ipaddr, err := getA(targetHost, *dnsServer)
 		if err != nil {
-			log.Fatalln("ee " + err.Error())
+			ErrorLogger.Fatalln(err.Error())
 		}
 		singlemx.ipaddr = ipaddr
-		log.Println("ii IP address MX: " + ipaddr)
+		InfoLogger.Println("IP address MX: " + ipaddr)
 
 		// ASN lookup
 		asn, err := getASN(ipaddr)
 		if err != nil {
-			log.Println("ee " + err.Error())
+			ErrorLogger.Println(err.Error())
 		} else {
 			singlemx.asnum = int(asn.ASNum)
 			singlemx.ascountry = asn.Country
-			log.Println("ii AS Number: " + strconv.Itoa(singlemx.asnum))
-			log.Println("ii AS Country: " + singlemx.ascountry)
+			InfoLogger.Println("AS Number: " + strconv.Itoa(singlemx.asnum))
+			InfoLogger.Println("AS Country: " + singlemx.ascountry)
 		}
 
 		// PTR lookup
-		log.Println("ii Checking for PTR record")
+		InfoLogger.Println("Checking for PTR record")
 		ptrentry, err := getPTR(ipaddr, *dnsServer)
 		if err != nil {
-			log.Fatalln("ee " + err.Error())
+			ErrorLogger.Fatalln(err.Error())
 		}
 
 		singlemx.ptrentry = ptrentry
-		log.Println("ii PTR entry: " + ptrentry)
+		InfoLogger.Println("PTR entry: " + ptrentry)
 
 		if ptrentry == targetHost {
 			singlemx.ptrmatch = true
-			log.Println(Green("++ PTR matches MX record"))
+			InfoLogger.Println(Green("PTR matches MX record"))
 		} else {
-			log.Println(Red("-- PTR does not match MX record"))
+			InfoLogger.Println(Red("PTR does not match MX record"))
 		}
 
 		// SPF lookup
-		log.Println("ii Checking for SPF record")
+		InfoLogger.Println("Checking for SPF record")
 		spfentry, spfanswer, err := getSPF(*targetHostName, *dnsServer)
 		if err != nil {
-			log.Fatalln("ee " + err.Error())
+			ErrorLogger.Fatalln(err.Error())
 		}
 		if spfentry {
 			singlemx.spfset = true
-			log.Println(Green("++ SPF set"))
-			if *verbose {
-				log.Println("ii " + spfanswer)
-			}
+			InfoLogger.Println(Green("SPF set"))
+			InfoLogger.Println(spfanswer)
 		} else {
-			log.Println(Red("-- No SPF set"))
+			InfoLogger.Println(Red("No SPF set"))
 		}
 
 		// MTA-STS lookup
-		log.Println("ii Checking for MTA-STS")
+		InfoLogger.Println("Checking for MTA-STS")
 		mtastsset, err := getMTASTS(*targetHostName, *dnsServer)
 		if err != nil {
-			log.Fatalln("ee " + err.Error())
+			ErrorLogger.Fatalln(err.Error())
 		}
 		if mtastsset {
 			singlemx.stsset = true
-			log.Println(Green("++ MTA-STS subdomain set"))
-			log.Println("ii Checking MTA-STS settings")
+			InfoLogger.Println(Green("MTA-STS subdomain set"))
+			InfoLogger.Println("Checking MTA-STS settings")
 			mtaststxt, err := mtasts(*targetHostName)
 			if err != nil {
-				log.Printf("ee %s", err.Error())
+				ErrorLogger.Printf("%s", err.Error())
 			} else {
 				runresult.ststext = mtaststxt
 			}
 
 		} else {
-			log.Println(Red("-- MTA-STS not set"))
+			InfoLogger.Println(Red("MTA-STS not set"))
 		}
 
 		// Checking for open e-mail ports
-		log.Println("ii Checking for open e-mail ports")
+		InfoLogger.Println("Checking for open e-mail ports")
 		openPorts := portScan(targetHost)
-		log.Print("ii Open ports: ", openPorts)
+		InfoLogger.Print("Open ports: ", openPorts)
 
 		if len(openPorts) == 0 {
-			log.Println(Cyan("ii No open ports to connect to. Quitting."))
+			InfoLogger.Println(Cyan("No open ports to connect to. I cannot check this host."))
 			continue
 		}
 		singlemx.openports = openPorts
 
 		for _, port := range openPorts {
 			if port == "25" {
-				log.Println("ii Checking for open relay")
+				InfoLogger.Println("Checking for open relay")
 				orresult, err := openRelay(*mailFrom, *mailTo, targetHost)
 				if err != nil {
-					log.Println("ww " + err.Error())
+					WarningLogger.Println(err.Error())
 				}
 
 				if len(orresult.serverstring) > 0 {
-					log.Printf("ii Server Banner: %s", orresult.serverstring)
+					InfoLogger.Printf("Server Banner: %s", orresult.serverstring)
 					singlemx.serverstring = strings.ReplaceAll(orresult.serverstring, "\r\n", "")
 				}
 
+				singlemx.starttls = orresult.tlsbool
 				if orresult.tlsbool {
-					singlemx.starttls = true
-					log.Println(Green("++ StartTLS supported"))
+					InfoLogger.Println(Green("StartTLS supported"))
 				} else {
-					log.Println("-- StartTLS not supported")
+					InfoLogger.Println(Cyan("StartTLS not supported"))
 				}
 
 				if orresult.tlsbool && orresult.tlsvalid {
 					singlemx.tlscertvalid = true
-					log.Println(Green("++ Certificate is valid"))
+					InfoLogger.Println(Green("Certificate is valid"))
 				}
 
 				if orresult.tlsbool && !orresult.tlsvalid {
-					log.Println("-- Certificate not valid")
+					InfoLogger.Println(Red("Certificate not valid"))
+				}
+
+				singlemx.fakesender = orresult.senderboolresult
+				if orresult.senderboolresult {
+					InfoLogger.Println("Fake sender accepted.")
+				} else {
+					InfoLogger.Println("Fake sender not accepted.")
+				}
+
+				if orresult.rcptboolresult {
+					InfoLogger.Println("Recipient accepted.")
+				} else {
+					InfoLogger.Println("Recipient not accepted. Skipped further open relay tests.")
 				}
 
 				if orresult.orboolresult {
 					singlemx.openrelay = true
-					log.Println(Red("!! Server is probably an open relay"))
+					InfoLogger.Println(Red("Server is probably an open relay"))
 				} else {
-					log.Println(Green("++ Server is not an open relay"))
+					InfoLogger.Println(Green("Server is not an open relay"))
 				}
 				runresult.mxresults = append(runresult.mxresults, singlemx)
 				println()
@@ -267,10 +289,12 @@ func main() {
 
 	// Output to tsv file
 	if *writetsv {
+		InfoLogger.Println("Writing report to file")
 		err := writeTSV(*targetHostName, runresult)
 		if err != nil {
-			log.Printf("ee %s", err.Error())
+			ErrorLogger.Printf("%s", err.Error())
 		}
 
 	}
+	InfoLogger.Println("Test finished.")
 }
