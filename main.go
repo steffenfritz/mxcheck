@@ -100,7 +100,7 @@ func main() {
 	if mxstatus {
 		InfoLogger.Println("Found MX: ")
 		for _, mxentry := range targetHosts {
-			InfoLogger.Println("ii           " + mxentry)
+			InfoLogger.Println("         " + mxentry)
 		}
 	} else {
 		WarningLogger.Println("No MX entry found. Using Target Host Name.")
@@ -108,7 +108,8 @@ func main() {
 
 	if !*noprompt {
 		reader := bufio.NewReader(os.Stdin)
-		InfoLogger.Print("Continue [y/n]: ")
+		// Fixing the newline "feature" in log
+		fmt.Printf("INFO:  %s Continue [y/n]: ", time.Now().Format("2006/01/02 15:04:05"))
 		response, err := reader.ReadString('\n')
 		if err != nil {
 			ErrorLogger.Fatal(err)
