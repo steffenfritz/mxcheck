@@ -97,6 +97,7 @@ func main() {
 	if err != nil {
 		ErrorLogger.Fatalln(err)
 	}
+
 	if mxstatus {
 		InfoLogger.Println("Found MX: ")
 		for _, mxentry := range targetHosts {
@@ -146,6 +147,9 @@ func main() {
 			}
 		}
 	}
+
+	InfoLogger.Println("Checking if domain is blacklisted")
+	checkdnsblName(*targetHostName, *dnsServer)
 
 	for _, targetHost := range targetHosts {
 		// Create temp mxresult to store single mx result

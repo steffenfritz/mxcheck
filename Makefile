@@ -7,7 +7,7 @@ BUILD=`git rev-parse --short HEAD`
 PLATFORMS=darwin linux windows
 ARCHITECTURES=amd64
 
-LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.Build=${BUILD} -w -s" 
+LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.Build=${BUILD} -w -s"
 BLDFLAGS=-buildmode=pie
 
 all: clean build_all
