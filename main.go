@@ -148,8 +148,9 @@ func main() {
 		}
 	}
 
-	InfoLogger.Println("Checking if domain is blacklisted")
-	checkdnsblName(*targetHostName, *dnsServer)
+	// Check blacklists for domain name
+	// InfoLogger.Println("Checking if domain is blacklisted")
+	namelisted, namenotlisted := checkdnsblName(*targetHostName, *dnsServer)
 
 	for _, targetHost := range targetHosts {
 		// Create temp mxresult to store single mx result
@@ -163,6 +164,8 @@ func main() {
 		}
 		singlemx.ipaddr = ipaddr
 		InfoLogger.Println("IP address MX: " + ipaddr)
+
+		iplisted, ipnotlisted := checkdnsblIP(ipaddr, *dnsServer)
 
 		// ASN lookup
 		asn, err := getASN(ipaddr)
@@ -225,6 +228,20 @@ func main() {
 
 		} else {
 			InfoLogger.Println(Red("MTA-STS not set"))
+		}
+
+		InfoLogger.Println("Result of DNS Blacklist checks")
+		for k, v := range namelisted {
+			InfoLogger.Println(Red("- " + k + " lists " + v))
+		}
+		for k, v := range iplisted {
+			InfoLogger.Println(Red("- " + k + " lists " + v))
+		}
+		for k, v := range namenotlisted {
+			InfoLogger.Println(Green("+ " + k + " does not list " + v))
+		}
+		for k, v := range ipnotlisted {
+			InfoLogger.Println(Green("+ " + k + " does not list " + v))
 		}
 
 		// Checking for open e-mail ports

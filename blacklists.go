@@ -3,7 +3,6 @@ package main
 import (
 	"strings"
 
-	. "github.com/logrusorgru/aurora"
 	"github.com/miekg/dns"
 )
 
@@ -13,26 +12,31 @@ var dnsbllistname = []string{"dbl.spamhaus.org"}
 
 // checkdnsblIP checks if an IP address is listed in a DNS blacklist
 // We use an A record request as DNSBL answer to any type of request
-func checkdnsblIP(ipaddr string, dnsServer string) {
-	// debug
-	println("test dnsbl by ip")
+func checkdnsblIP(ipaddr string, dnsServer string) (map[string]string, map[string]string) {
+	iplisted := make(map[string]string)
+	ipnotlisted := make(map[string]string)
 	// Reverse the ip address
 	ipslice := strings.Split(ipaddr, ".")
 	rddapi := ipslice[3] + "." + ipslice[2] + "." + ipslice[1] + "." + ipslice[0]
 
 	for _, dnsbl := range dnsbllistip {
-		resp, err := getA(rddapi+"."+dnsbl, dnsServer)
+		requestip := rddapi + "." + dnsbl + "."
+		resp, err := getA(requestip, dnsServer)
 
-		if err != nil {
-			println(resp)
+		if len(resp) != 0 && err.Error() != "no answer from DNS" {
+			iplisted[dnsbl] = ipaddr
 		} else {
-			println(err.Error())
+			ipnotlisted[dnsbl] = ipaddr
 		}
 	}
+	return iplisted, ipnotlisted
 }
 
 // checkdnsblName checks if a domain name is listed in a DNS blacklist
-func checkdnsblName(domainname string, dnsServer string) {
+func checkdnsblName(domainname string, dnsServer string) (map[string]string, map[string]string) {
+	listed := make(map[string]string)
+	notlisted := make(map[string]string)
+
 	for _, dnsbl := range dnsbllistname {
 		requestname := domainname + "." + dnsbl + "."
 
@@ -47,9 +51,11 @@ func checkdnsblName(domainname string, dnsServer string) {
 		}
 
 		if len(in.Answer) == 0 {
-			InfoLogger.Println(Green("+ Not listed in " + dnsbl))
+			notlisted[dnsbl] = domainname
 		} else {
-			InfoLogger.Println(Red("- Listed in " + dnsbl))
+			listed[dnsbl] = domainname
 		}
 	}
+
+	return listed, notlisted
 }
