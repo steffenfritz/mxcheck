@@ -1,9 +1,10 @@
 package main
 
 import (
+	"strings"
+
 	. "github.com/logrusorgru/aurora"
 	"github.com/miekg/dns"
-	"strings"
 )
 
 // List of DNSBL services
