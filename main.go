@@ -28,21 +28,25 @@ type runresult struct {
 
 // mxresult is used to store a mx scan result for further processing
 type mxresult struct {
-	mxentry      string
-	ipaddr       string
-	asnum        int
-	ascountry    string
-	ptrentry     string
-	ptrmatch     bool
-	serverstring string
-	spfset       bool
-	stsset       bool
-	openports    []string
-	fakesender   bool
-	fakercpt     bool
-	starttls     bool
-	tlscertvalid bool
-	openrelay    bool
+	mxentry             string
+	ipaddr              string
+	asnum               int
+	ascountry           string
+	ptrentry            string
+	ptrmatch            bool
+	serverstring        string
+	spfset              bool
+	stsset              bool
+	openports           []string
+	fakesender          bool
+	fakercpt            bool
+	starttls            bool
+	tlscertvalid        bool
+	openrelay           bool
+	bldnsnamelisted     map[string]string
+	blddnsnamenotlisted map[string]string
+	bldnsiplisted       map[string]string
+	bldnsipnotlisted    map[string]string
 }
 
 var (
@@ -192,7 +196,7 @@ func main() {
 			singlemx.ptrmatch = true
 			InfoLogger.Println(Green("PTR matches MX record"))
 		} else {
-			InfoLogger.Println(Red("PTR does not match MX record"))
+			InfoLogger.Println(Yellow("PTR does not match MX record"))
 		}
 
 		// SPF lookup
