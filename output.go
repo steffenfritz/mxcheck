@@ -16,7 +16,7 @@ func NewTSVWriter(w io.Writer) (writer *csv.Writer) {
 	return
 }
 
-func writeTSV(targetHostName string, runresult runresult) error {
+func writeTSV(targetHostName string, runresult runresult, blacklist bool) error {
 	fd, err := os.Create(targetHostName + "-" + time.Now().Format(time.RFC3339) + ".tsv")
 	if err != nil {
 		return err
@@ -61,6 +61,21 @@ func writeTSV(targetHostName string, runresult runresult) error {
 		err = tsv.Write([]string{"Fake Sender Accepted", strconv.FormatBool(mxentry.fakesender)})
 		err = tsv.Write([]string{"Fake Recipient Accepted", strconv.FormatBool(mxentry.fakercpt)})
 		err = tsv.Write([]string{"Open Relay", strconv.FormatBool(mxentry.openrelay)})
+	}
+
+	if blacklist {
+		for bldns, blacklistresult := range runresult.bldnsnamelisted {
+			err = tsv.Write([]string{bldns + " lists ", blacklistresult})
+		}
+		for bldns, blacklistresult := range runresult.bldnsnamenotlisted {
+			err = tsv.Write([]string{bldns + " does not list ", blacklistresult})
+		}
+		for bldns, blacklistresult := range runresult.bldnsiplisted {
+			err = tsv.Write([]string{bldns + " lists ", blacklistresult})
+		}
+		for bldns, blacklistresult := range runresult.bldnsipnotlisted {
+			err = tsv.Write([]string{bldns + " does not list ", blacklistresult})
+		}
 	}
 
 	tsv.Flush()

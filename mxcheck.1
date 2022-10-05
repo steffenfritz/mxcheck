@@ -22,7 +22,7 @@
 .\" %%%LICENSE_END
 
 
-.TH mxcheck 1 "February 2022" "version 1.3.0"
+.TH mxcheck 1 "November 2022" "version 1.4.0-BETA"
 
 .SH NAME
 mxcheck
@@ -32,12 +32,17 @@ mxcheck
 mxcheck is an info scanner for e-mail servers. It checks the following DNS records: A, MX, PTR, SPF, MTA-STS and DKIM.
 It also checks for StartTLS support and the validity of the certificate.
 After scanning the tcp ports 25, 465 and 587 mxcheck checks if the e-mail server is an open relay by trying to send a single message.
+It also checks whether the service is blacklisted.
 
 .SH FLAGS
 mxcheck  
 
 .BR \-d,\ --dnsserver\fR
     The dns server to consult (default "8.8.8.8").
+
+
+.BR \-b,\ --blacklist\fR
+    Check if the service is on blacklists.
 
 .BR \-f,\ --mailfrom\fR
     Set the mailFrom address (default "info@foo.wtf").

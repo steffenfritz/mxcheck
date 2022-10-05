@@ -16,37 +16,37 @@ import (
 
 // runresult is used to store the metadata of a single run
 type runresult struct {
-	testdate         string
-	targetdomainname string
-	ststext          mtaststxt
-	dnsserver        string
-	mailfrom         string
-	mailto           string
-	mxresults        []mxresult
-	dkimresult       dkim
+	testdate           string
+	targetdomainname   string
+	ststext            mtaststxt
+	dnsserver          string
+	mailfrom           string
+	mailto             string
+	mxresults          []mxresult
+	dkimresult         dkim
+	bldnsnamelisted    map[string]string
+	bldnsnamenotlisted map[string]string
+	bldnsiplisted      map[string]string
+	bldnsipnotlisted   map[string]string
 }
 
 // mxresult is used to store a mx scan result for further processing
 type mxresult struct {
-	mxentry             string
-	ipaddr              string
-	asnum               int
-	ascountry           string
-	ptrentry            string
-	ptrmatch            bool
-	serverstring        string
-	spfset              bool
-	stsset              bool
-	openports           []string
-	fakesender          bool
-	fakercpt            bool
-	starttls            bool
-	tlscertvalid        bool
-	openrelay           bool
-	bldnsnamelisted     map[string]string
-	blddnsnamenotlisted map[string]string
-	bldnsiplisted       map[string]string
-	bldnsipnotlisted    map[string]string
+	mxentry      string
+	ipaddr       string
+	asnum        int
+	ascountry    string
+	ptrentry     string
+	ptrmatch     bool
+	serverstring string
+	spfset       bool
+	stsset       bool
+	openports    []string
+	fakesender   bool
+	fakercpt     bool
+	starttls     bool
+	tlscertvalid bool
+	openrelay    bool
 }
 
 var (
@@ -65,6 +65,7 @@ func main() {
 
 	println()
 
+	blacklist := flag.BoolP("blacklist", "b", false, "Check if the service is on blacklists")
 	dkimSelector := flag.StringP("dkim-selector", "S", "",
 		"The DKIM selector. If set a DKIM check is performed on the provided service domain")
 	dnsServer := flag.StringP("dnsserver", "d", "8.8.8.8", "The dns server to be requested")
@@ -154,7 +155,9 @@ func main() {
 
 	// Check blacklists for domain name
 	// InfoLogger.Println("Checking if domain is blacklisted")
-	namelisted, namenotlisted := checkdnsblName(*targetHostName, *dnsServer)
+	if *blacklist {
+		runresult.bldnsnamelisted, runresult.bldnsnamenotlisted = checkdnsblName(*targetHostName, *dnsServer)
+	}
 
 	for _, targetHost := range targetHosts {
 		// Create temp mxresult to store single mx result
@@ -169,7 +172,9 @@ func main() {
 		singlemx.ipaddr = ipaddr
 		InfoLogger.Println("IP address MX: " + ipaddr)
 
-		iplisted, ipnotlisted := checkdnsblIP(ipaddr, *dnsServer)
+		if *blacklist {
+			runresult.bldnsiplisted, runresult.bldnsipnotlisted = checkdnsblIP(ipaddr, *dnsServer)
+		}
 
 		// ASN lookup
 		asn, err := getASN(ipaddr)
@@ -234,18 +239,20 @@ func main() {
 			InfoLogger.Println(Red("MTA-STS not set"))
 		}
 
-		InfoLogger.Println("Result of DNS Blacklist checks")
-		for k, v := range namelisted {
-			InfoLogger.Println(Red("- " + k + " lists " + v))
-		}
-		for k, v := range iplisted {
-			InfoLogger.Println(Red("- " + k + " lists " + v))
-		}
-		for k, v := range namenotlisted {
-			InfoLogger.Println(Green("+ " + k + " does not list " + v))
-		}
-		for k, v := range ipnotlisted {
-			InfoLogger.Println(Green("+ " + k + " does not list " + v))
+		if *blacklist {
+			InfoLogger.Println("Result of DNS Blacklist checks")
+			for k, v := range runresult.bldnsnamelisted {
+				InfoLogger.Println(Red("- " + k + " lists " + v))
+			}
+			for k, v := range runresult.bldnsiplisted {
+				InfoLogger.Println(Red("- " + k + " lists " + v))
+			}
+			for k, v := range runresult.bldnsnamenotlisted {
+				InfoLogger.Println(Green("+ " + k + " does not list " + v))
+			}
+			for k, v := range runresult.bldnsipnotlisted {
+				InfoLogger.Println(Green("+ " + k + " does not list " + v))
+			}
 		}
 
 		// Checking for open e-mail ports
@@ -316,7 +323,7 @@ func main() {
 	// Output to tsv file
 	if *writetsv {
 		InfoLogger.Println("Writing report to file")
-		err := writeTSV(*targetHostName, runresult)
+		err := writeTSV(*targetHostName, runresult, *blacklist)
 		if err != nil {
 			ErrorLogger.Printf("%s", err.Error())
 		}

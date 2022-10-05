@@ -1,11 +1,11 @@
 ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
 BINARY=mxcheck
-VERSION=1.4.0
+VERSION=1.4.0-BETA
 
 BUILD=`git rev-parse --short HEAD`
 PLATFORMS=darwin linux windows
-ARCHITECTURES=amd64
+ARCHITECTURES=amd64 arm64
 
 LDFLAGS=-ldflags "-X main.Version=${VERSION} -X main.Build=${BUILD} -w -s"
 BLDFLAGS=-buildmode=pie
@@ -17,13 +17,19 @@ build:
 
 build_all:
 	$(foreach GOOS, $(PLATFORMS),\
-	$(foreach GOARCH, $(ARCHITECTURES), $(shell export GOOS=$(GOOS); export GOARCH=$(GOARCH); go build $(BLDFLAGS) $(LDFLAGS) -v -o $(BINARY)-$(GOOS))))
-	mv mxcheck-darwin mxcheck && tar cvfz mxcheck_macos_$(VERSION).tar.gz mxcheck
+	$(foreach GOARCH, $(ARCHITECTURES), $(shell export GOOS=$(GOOS); export GOARCH=$(GOARCH); go build $(BLDFLAGS) $(LDFLAGS) -v -o $(BINARY)-$(GOOS)-$(GOARCH))))
+	mv mxcheck-darwin-amd64 mxcheck && tar cvfz mxcheck_macos_amd64_$(VERSION).tar.gz mxcheck
 	rm mxcheck
-	mv mxcheck-linux mxcheck && tar cvfz mxcheck_linux_$(VERSION).tar.gz mxcheck
+	mv mxcheck-darwin-arm64 mxcheck && tar cvfz mxcheck_macos_arm64_$(VERSION).tar.gz mxcheck
 	rm mxcheck
-	mv mxcheck-windows mxcheck.exe && tar cvfz mxcheck_win_$(VERSION).tar.gz mxcheck.exe
+	mv mxcheck-linux-amd64 mxcheck && tar cvfz mxcheck_linux_amd64_$(VERSION).tar.gz mxcheck
 	rm mxcheck
+	mv mxcheck-linux-arm64 mxcheck && tar cvfz mxcheck_linux_arm64_$(VERSION).tar.gz mxcheck
+	rm mxcheck
+	mv mxcheck-windows-amd64 mxcheck.exe && tar cvfz mxcheck_win_$(VERSION).tar.gz mxcheck.exe
+	rm mxcheck.exe
+	mv mxcheck-windows-arm64 mxcheck.exe && tar cvfz mxcheck_win_$(VERSION).tar.gz mxcheck.exe
+	rm mxcheck.exe
 
 clean:
 	rm -f '${BINARY}-linux'
