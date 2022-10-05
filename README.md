@@ -7,11 +7,13 @@ It checks
   * AS Number and AS Country
   * the support of StartTLS and the certificate
   * open ports: 25, 465, 587
+  * if the service is listed by blacklists
   * and if the server is an open relay
 
 You can set mailFrom, mailTo, the DNS server, DKIM selector and output a report in tsv format.
 
 
+    -bm --blacklist          Check if the service is on blacklists
     -d, --dnsserver string   The dns server to be requested (default "8.8.8.8")
     -f, --mailfrom string    Set the mailFrom address (default "info@foo.wtf")
     -t, --mailto string      Set the mailTo address (default "info@baz.wtf")
@@ -25,7 +27,7 @@ You can set mailFrom, mailTo, the DNS server, DKIM selector and output a report 
 
 # Version
 
-v1.3.0
+v1.4.0-BETA
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/steffenfritz/mxcheck)](https://goreportcard.com/report/github.com/steffenfritz/mxcheck) 
 [![Go Reference](https://pkg.go.dev/badge/github.com/steffenfritz/mxcheck.svg)](https://pkg.go.dev/github.com/steffenfritz/mxcheck)
@@ -47,6 +49,7 @@ or
     ./mxcheck -s 2600.com -v
     ./mxcheck -s 2600.com -v -d 8.8.8.8
     ./mxcheck -s 2600.com -v -n -f info@baz.com -t boss@foo.org -w -S default
+    ./mxcheck -s 2600.com -v -n -f info@baz.com -t boss@foo.org -w -S default -b
     
    [![asciicast](https://asciinema.org/a/471229.svg)](https://asciinema.org/a/471229)
     
