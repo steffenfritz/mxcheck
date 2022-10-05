@@ -16,14 +16,18 @@ import (
 
 // runresult is used to store the metadata of a single run
 type runresult struct {
-	testdate         string
-	targetdomainname string
-	ststext          mtaststxt
-	dnsserver        string
-	mailfrom         string
-	mailto           string
-	mxresults        []mxresult
-	dkimresult       dkim
+	testdate           string
+	targetdomainname   string
+	ststext            mtaststxt
+	dnsserver          string
+	mailfrom           string
+	mailto             string
+	mxresults          []mxresult
+	dkimresult         dkim
+	bldnsnamelisted    map[string]string
+	bldnsnamenotlisted map[string]string
+	bldnsiplisted      map[string]string
+	bldnsipnotlisted   map[string]string
 }
 
 // mxresult is used to store a mx scan result for further processing
@@ -61,6 +65,7 @@ func main() {
 
 	println()
 
+	blacklist := flag.BoolP("blacklist", "b", false, "Check if the service is on blacklists")
 	dkimSelector := flag.StringP("dkim-selector", "S", "",
 		"The DKIM selector. If set a DKIM check is performed on the provided service domain")
 	dnsServer := flag.StringP("dnsserver", "d", "8.8.8.8", "The dns server to be requested")
@@ -97,6 +102,7 @@ func main() {
 	if err != nil {
 		ErrorLogger.Fatalln(err)
 	}
+
 	if mxstatus {
 		InfoLogger.Println("Found MX: ")
 		for _, mxentry := range targetHosts {
@@ -147,6 +153,12 @@ func main() {
 		}
 	}
 
+	// Check blacklists for domain name
+	// InfoLogger.Println("Checking if domain is blacklisted")
+	if *blacklist {
+		runresult.bldnsnamelisted, runresult.bldnsnamenotlisted = checkdnsblName(*targetHostName, *dnsServer)
+	}
+
 	for _, targetHost := range targetHosts {
 		// Create temp mxresult to store single mx result
 		singlemx := mxresult{}
@@ -159,6 +171,10 @@ func main() {
 		}
 		singlemx.ipaddr = ipaddr
 		InfoLogger.Println("IP address MX: " + ipaddr)
+
+		if *blacklist {
+			runresult.bldnsiplisted, runresult.bldnsipnotlisted = checkdnsblIP(ipaddr, *dnsServer)
+		}
 
 		// ASN lookup
 		asn, err := getASN(ipaddr)
@@ -185,7 +201,7 @@ func main() {
 			singlemx.ptrmatch = true
 			InfoLogger.Println(Green("PTR matches MX record"))
 		} else {
-			InfoLogger.Println(Red("PTR does not match MX record"))
+			InfoLogger.Println(Yellow("PTR does not match MX record"))
 		}
 
 		// SPF lookup
@@ -221,6 +237,22 @@ func main() {
 
 		} else {
 			InfoLogger.Println(Red("MTA-STS not set"))
+		}
+
+		if *blacklist {
+			InfoLogger.Println("Result of DNS Blacklist checks")
+			for k, v := range runresult.bldnsnamelisted {
+				InfoLogger.Println(Red("- " + k + " lists " + v))
+			}
+			for k, v := range runresult.bldnsiplisted {
+				InfoLogger.Println(Red("- " + k + " lists " + v))
+			}
+			for k, v := range runresult.bldnsnamenotlisted {
+				InfoLogger.Println(Green("+ " + k + " does not list " + v))
+			}
+			for k, v := range runresult.bldnsipnotlisted {
+				InfoLogger.Println(Green("+ " + k + " does not list " + v))
+			}
 		}
 
 		// Checking for open e-mail ports
@@ -291,7 +323,7 @@ func main() {
 	// Output to tsv file
 	if *writetsv {
 		InfoLogger.Println("Writing report to file")
-		err := writeTSV(*targetHostName, runresult)
+		err := writeTSV(*targetHostName, runresult, *blacklist)
 		if err != nil {
 			ErrorLogger.Printf("%s", err.Error())
 		}
