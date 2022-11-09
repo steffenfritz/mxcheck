@@ -13,7 +13,7 @@ It checks
 You can set mailFrom, mailTo, the DNS server, DKIM selector and output a report in tsv format.
 
 
-    -b --blacklist           Check if the service is on blacklists
+    -b, --blacklist           Check if the service is on blacklists
     -d, --dnsserver string   The dns server to be requested (default "8.8.8.8")
     -f, --mailfrom string    Set the mailFrom address (default "info@foo.wtf")
     -t, --mailto string      Set the mailTo address (default "info@baz.wtf")
@@ -27,7 +27,7 @@ You can set mailFrom, mailTo, the DNS server, DKIM selector and output a report 
 
 # Version
 
-v1.4.0-BETA
+v1.4.0
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/steffenfritz/mxcheck)](https://goreportcard.com/report/github.com/steffenfritz/mxcheck) 
 [![Go Reference](https://pkg.go.dev/badge/github.com/steffenfritz/mxcheck.svg)](https://pkg.go.dev/github.com/steffenfritz/mxcheck)
