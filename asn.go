@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/steffenfritz/iptoasn"
+	"github.com/jamesog/iptoasn"
 )
 
 // getASN does a bgp lookup for an ip and returns the asn
