@@ -1,7 +1,7 @@
 ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
 BINARY=mxcheck
-VERSION=1.4.0-BETA
+VERSION=1.4.0
 
 BUILD=`git rev-parse --short HEAD`
 PLATFORMS=darwin linux windows
@@ -26,9 +26,9 @@ build_all:
 	rm mxcheck
 	mv mxcheck-linux-arm64 mxcheck && tar cvfz mxcheck_linux_arm64_$(VERSION).tar.gz mxcheck
 	rm mxcheck
-	mv mxcheck-windows-amd64 mxcheck.exe && tar cvfz mxcheck_win_$(VERSION).tar.gz mxcheck.exe
+	mv mxcheck-windows-amd64 mxcheck.exe && tar cvfz mxcheck_win_amd64_$(VERSION).tar.gz mxcheck.exe
 	rm mxcheck.exe
-	mv mxcheck-windows-arm64 mxcheck.exe && tar cvfz mxcheck_win_$(VERSION).tar.gz mxcheck.exe
+	mv mxcheck-windows-arm64 mxcheck.exe && tar cvfz mxcheck_win_arm64_$(VERSION).tar.gz mxcheck.exe
 	rm mxcheck.exe
 
 clean:
