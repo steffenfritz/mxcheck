@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"net/smtp"
+	"strings"
 	"time"
 )
 
@@ -61,7 +62,8 @@ func openRelay(mailFrom string, mailTo string, targetHost string) (openResult, e
 		// update config to ignore invalid TLS certificates and proceed
 		tlsconfig = &tls.Config{InsecureSkipVerify: true}
 		err = c.StartTLS(tlsconfig)
-		if err == nil {
+		// As there are no error types returned by the TLS client we need this ugly or. Should be fixed with a switch
+		if err == nil || strings.HasSuffix(err.Error(), "certificate name does not match input") {
 			or.tlsbool = true
 			or.tlsvalid = false
 		}

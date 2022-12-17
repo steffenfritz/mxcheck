@@ -60,6 +60,12 @@ func getA(targetHostName string, dnsServer string) (string, error) {
 
 	if t, ok := in.Answer[0].(*dns.A); ok {
 		a = t.A.String()
+		// We check for a second ip address when the first entry is also an mx entry.
+		// We also have to update the targetHost because of the cwrt test in openrelay
+	} else {
+		if t, ok := in.Answer[1].(*dns.A); ok {
+			a = t.A.String()
+		}
 	}
 
 	return a, err
