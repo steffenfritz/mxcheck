@@ -58,6 +58,7 @@ func writeTSV(targetHostName string, runresult runresult, blacklist bool) error 
 		err = tsv.Write([]string{"MTA-STS Set", strconv.FormatBool(mxentry.stsset)})
 		err = tsv.Write([]string{"STARTTLS Supported", strconv.FormatBool(mxentry.starttls)})
 		err = tsv.Write([]string{"Certificate Valid", strconv.FormatBool(mxentry.tlscertvalid)})
+		err = tsv.Write([]string{"VRFY Supported", strconv.FormatBool(mxentry.vrfysupport)})
 		err = tsv.Write([]string{"Fake Sender Accepted", strconv.FormatBool(mxentry.fakesender)})
 		err = tsv.Write([]string{"Fake Recipient Accepted", strconv.FormatBool(mxentry.fakercpt)})
 		err = tsv.Write([]string{"Open Relay", strconv.FormatBool(mxentry.openrelay)})
