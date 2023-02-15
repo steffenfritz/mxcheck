@@ -8,6 +8,7 @@ It checks
   * the support of StartTLS and the certificate
   * open ports: 25, 465, 587
   * if the service is listed by blacklists
+  * if it leaks information by server string and VRFY command
   * and if the server is an open relay
 
 You can set mailFrom, mailTo, the DNS server, DKIM selector and output a report in tsv format.
@@ -18,7 +19,7 @@ You can set mailFrom, mailTo, the DNS server, DKIM selector and output a report 
     -f, --mailfrom string    Set the mailFrom address (default "info@foo.wtf")
     -t, --mailto string      Set the mailTo address (default "info@baz.wtf")
     -n, --no-prompt          Answer yes to all questions
-    -s, --service string     The service host to check (default "localhost")
+    -s, --service string     The service host to check (mandatory flag)
     -S, --dkim-selector      The DKIM selector. If set a dkim check is performed on the provided service domain
     -v, --version            Version and license
     -w, --write-tsv          Write tsv formated report to file
@@ -27,7 +28,7 @@ You can set mailFrom, mailTo, the DNS server, DKIM selector and output a report 
 
 # Version
 
-v1.4.2
+v1.5.0
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/steffenfritz/mxcheck)](https://goreportcard.com/report/github.com/steffenfritz/mxcheck) 
 [![Go Reference](https://pkg.go.dev/badge/github.com/steffenfritz/mxcheck.svg)](https://pkg.go.dev/github.com/steffenfritz/mxcheck)
@@ -47,9 +48,9 @@ or
 
     ./mxcheck -s 2600.com
     ./mxcheck -s 2600.com -v
-    ./mxcheck -s 2600.com -v -d 8.8.8.8
-    ./mxcheck -s 2600.com -v -n -f info@baz.com -t boss@foo.org -w -S default
-    ./mxcheck -s 2600.com -v -n -f info@baz.com -t boss@foo.org -w -S default -b
+    ./mxcheck -s 2600.com -d 8.8.8.8
+    ./mxcheck -s 2600.com -n -f info@baz.com -t boss@foo.org -w -S default
+    ./mxcheck -s 2600.com -n -f info@baz.com -t boss@foo.org -w -S default -b
     
    [![asciicast](https://asciinema.org/a/471229.svg)](https://asciinema.org/a/471229)
     

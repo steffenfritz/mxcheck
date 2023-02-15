@@ -1,3 +1,4 @@
 mxcheck
 *.tar.gz
 .DS_Store
+.idea
