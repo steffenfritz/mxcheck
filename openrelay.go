@@ -21,6 +21,7 @@ type openResult struct {
 	serverstring     string
 	tlsbool          bool
 	tlsvalid         bool
+	vrfybool         bool
 }
 
 // openRelay checks if a mail server sends email without
@@ -67,6 +68,12 @@ func openRelay(mailFrom string, mailTo string, targetHost string) (openResult, e
 			or.tlsbool = true
 			or.tlsvalid = false
 		}
+	}
+
+	// Check if server supports VRFY command. The
+	vrfyerr := c.Verify(mailFrom)
+	if vrfyerr == nil {
+		or.vrfybool = true
 	}
 
 	// Set from value

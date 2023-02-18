@@ -47,6 +47,7 @@ type mxresult struct {
 	starttls     bool
 	tlscertvalid bool
 	openrelay    bool
+	vrfysupport  bool
 }
 
 var (
@@ -274,11 +275,13 @@ func main() {
 					WarningLogger.Println(err.Error())
 				}
 
+				// Server string
 				if len(orresult.serverstring) > 0 {
 					InfoLogger.Printf("Server Banner: %s", orresult.serverstring)
 					singlemx.serverstring = strings.ReplaceAll(orresult.serverstring, "\r\n", "")
 				}
 
+				// TLS test
 				singlemx.starttls = orresult.tlsbool
 				if orresult.tlsbool {
 					InfoLogger.Println(Green("StartTLS supported"))
@@ -295,6 +298,15 @@ func main() {
 					InfoLogger.Println(Red("Certificate not valid"))
 				}
 
+				// VRFY test
+				singlemx.vrfysupport = orresult.vrfybool
+				if orresult.vrfybool {
+					InfoLogger.Println(Red("VRFY command supported."))
+				} else {
+					InfoLogger.Println(Green("VRFY command not supported."))
+				}
+
+				// Sender accepted
 				singlemx.fakesender = orresult.senderboolresult
 				if orresult.senderboolresult {
 					InfoLogger.Println("Fake sender accepted.")
@@ -302,12 +314,14 @@ func main() {
 					InfoLogger.Println("Fake sender not accepted.")
 				}
 
+				// Recipient accepted
 				if orresult.rcptboolresult {
 					InfoLogger.Println("Recipient accepted.")
 				} else {
 					InfoLogger.Println("Recipient not accepted. Skipped further open relay tests.")
 				}
 
+				// Open Relay test
 				if orresult.orboolresult {
 					singlemx.openrelay = true
 					InfoLogger.Println(Red("Server is probably an open relay"))
