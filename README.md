@@ -1,4 +1,4 @@
-# mxcheck
+![mxcheck logo](resources/mxcheck_logo_250x.png)
 
 mxcheck is an info scanner for e-mail servers.
 
