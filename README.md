@@ -54,6 +54,8 @@ or
     
    [![asciicast](https://asciinema.org/a/471229.svg)](https://asciinema.org/a/471229)
     
+    
+# Check for authentication
 
 There is no check whether the server needs authentication. However, you can do two runs:
 
@@ -65,5 +67,5 @@ The second one uses a from and a to address from the mail server's scope, e.g.:
 
     ./mxcheck -s example.com -f info@example.com -t boss@example.com
 
-If the first one returns ``Server is not an open relay`` and the second one returns `Server is probably an open relay` the server is not an open relay, but you can send mails from local to local addresses.
+If the first one returns ``Server is not an open relay`` and the second one returns `Server is probably an open relay` the server is not an open relay, but you can send mails from local to local addresses without authentication.
 
