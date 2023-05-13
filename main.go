@@ -28,6 +28,8 @@ type runresult struct {
 	bldnsnamenotlisted map[string]string
 	bldnsiplisted      map[string]string
 	bldnsipnotlisted   map[string]string
+	dmarcset           bool
+	dmarcfull          string
 }
 
 // mxresult is used to store a mx scan result for further processing
@@ -97,7 +99,7 @@ func main() {
 	runresult.mailto = *mailTo
 
 	runresult.targetdomainname = *targetHostName
-	InfoLogger.Println("Checking: " + *targetHostName)
+	InfoLogger.Println("== Checking: " + *targetHostName + " ==")
 
 	targetHosts, mxstatus, err := getMX(targetHostName, *dnsServer)
 	if err != nil {
@@ -129,7 +131,7 @@ func main() {
 	}
 
 	if len(*dkimSelector) > 0 {
-		InfoLogger.Println("Checking DKIM record")
+		InfoLogger.Println("== Checking DKIM record ==")
 		runresult.dkimresult, err = getDKIM(*dkimSelector, *targetHostName, *dnsServer)
 		if err != nil {
 			ErrorLogger.Printf("%s", err.Error())
@@ -154,6 +156,23 @@ func main() {
 		}
 	}
 
+	// DMARC lookup
+	InfoLogger.Println("== Checking DMARC record ==")
+	dmarcentry, err := getDMARC(*targetHostName, *dnsServer)
+	if err != nil {
+		ErrorLogger.Fatalln(err.Error())
+	}
+	if dmarcentry.dmarcset {
+		runresult.dmarcset = true
+		// this copying makes little sense tbh right now. But if we parse the answer it will help.
+		runresult.dmarcfull = dmarcentry.dmarcfull
+		InfoLogger.Println(Green("DMARC set"))
+		InfoLogger.Println(runresult.dmarcfull)
+	} else {
+		// This is just yellow because DMARC has its friends and foes...
+		InfoLogger.Println(Yellow("No DMARC set"))
+	}
+
 	// Check blacklists for domain name
 	// InfoLogger.Println("Checking if domain is blacklisted")
 	if *blacklist {
@@ -165,7 +184,7 @@ func main() {
 		singlemx := mxresult{}
 		singlemx.mxentry = targetHost
 
-		InfoLogger.Println("Checking for A record")
+		InfoLogger.Println("== Checking for A record ==")
 		ipaddr, err := getA(targetHost, *dnsServer)
 		if err != nil {
 			ErrorLogger.Fatalln(err.Error())
@@ -189,7 +208,7 @@ func main() {
 		}
 
 		// PTR lookup
-		InfoLogger.Println("Checking for PTR record")
+		InfoLogger.Println("== Checking for PTR record ==")
 		ptrentry, err := getPTR(ipaddr, *dnsServer)
 		if err != nil {
 			ErrorLogger.Fatalln(err.Error())
@@ -202,11 +221,11 @@ func main() {
 			singlemx.ptrmatch = true
 			InfoLogger.Println(Green("PTR matches MX record"))
 		} else {
-			InfoLogger.Println(Yellow("PTR does not match MX record"))
+			InfoLogger.Println(Red("PTR does not match MX record"))
 		}
 
 		// SPF lookup
-		InfoLogger.Println("Checking for SPF record")
+		InfoLogger.Println("== Checking for SPF record ==")
 		spfentry, spfanswer, err := getSPF(*targetHostName, *dnsServer)
 		if err != nil {
 			ErrorLogger.Fatalln(err.Error())
@@ -220,7 +239,7 @@ func main() {
 		}
 
 		// MTA-STS lookup
-		InfoLogger.Println("Checking for MTA-STS")
+		InfoLogger.Println("== Checking for MTA-STS ==")
 		mtastsset, err := getMTASTS(*targetHostName, *dnsServer)
 		if err != nil {
 			ErrorLogger.Fatalln(err.Error())
@@ -241,7 +260,7 @@ func main() {
 		}
 
 		if *blacklist {
-			InfoLogger.Println("Result of DNS Blacklist checks")
+			InfoLogger.Println("== Result of DNS Blacklist checks ==")
 			for k, v := range runresult.bldnsnamelisted {
 				InfoLogger.Println(Red("- " + k + " lists " + v))
 			}
@@ -257,7 +276,7 @@ func main() {
 		}
 
 		// Checking for open e-mail ports
-		InfoLogger.Println("Checking for open e-mail ports")
+		InfoLogger.Println("== Checking for open e-mail ports ==")
 		openPorts := portScan(targetHost)
 		InfoLogger.Print("Open ports: ", openPorts)
 
@@ -269,7 +288,7 @@ func main() {
 
 		for _, port := range openPorts {
 			if port == "25" {
-				InfoLogger.Println("Checking for open relay")
+				InfoLogger.Println("== Checking for open relay ==")
 				orresult, err := openRelay(*mailFrom, *mailTo, targetHost)
 				if err != nil {
 					WarningLogger.Println(err.Error())
