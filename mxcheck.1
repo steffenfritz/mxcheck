@@ -22,7 +22,7 @@
 .\" %%%LICENSE_END
 
 
-.TH mxcheck 1 "February 2023" "version 1.5.0"
+.TH mxcheck 1 "May 2023" "version 1.6.0"
 
 .SH NAME
 mxcheck
@@ -37,12 +37,11 @@ It also checks whether the service is blacklisted by querying public blacklist s
 .SH FLAGS
 mxcheck  
 
-.BR \-d,\ --dnsserver\fR
-    The dns server to consult (default "8.8.8.8").
-
-
 .BR \-b,\ --blacklist\fR
     Check if the service is on blacklists.
+
+.BR \-d,\ --dnsserver\fR
+    The dns server to consult (default "8.8.8.8").
 
 .BR \-f,\ --mailfrom\fR
     Set the mailFrom address (default "info@foo.wtf").

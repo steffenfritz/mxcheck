@@ -164,7 +164,7 @@ func getMTASTS(targetHostName string, dnsServer string) (bool, error) {
 }
 
 // getDKIM builds a TXT request and sends it to a dns server
-// It returns a bool if an mta-sts entry is set and an error
+// It returns type dkim if an mta-sts entry is set and an error
 func getDKIM(selector string, targetHostName string, dnsServer string) (dkim, error) {
 	// This infix is a fixed domain part for dkim
 	dkiminfix := "_domainkey."
@@ -222,4 +222,35 @@ func getDKIM(selector string, targetHostName string, dnsServer string) (dkim, er
 	}
 
 	return dkim, err
+}
+
+// getDMARC builds a TXT request and sends it to a dns server
+// It returns type dmarc and an error
+func getDMARC(targetHostName string, dnsServer string) (dmarc, error) {
+	var dmarc dmarc
+	dmarcdomain := "_dmarc." + targetHostName
+
+	m := new(dns.Msg)
+	m.SetQuestion(dns.Fqdn(dmarcdomain), dns.TypeTXT)
+
+	c := new(dns.Client)
+	c.Net = "tcp"
+	in, _, err := c.Exchange(m, dnsServer+":53")
+	if err != nil {
+		return dmarc, err
+	}
+
+	if len(in.Answer) != 0 {
+		for n := range in.Answer {
+			t := *in.Answer[n].(*dns.TXT)
+			for _, v := range t.Txt {
+				if strings.Contains(v, "v=DMARC1") {
+					dmarc.dmarcset = true
+					dmarc.dmarcfull = in.Answer[n].String()
+				}
+			}
+		}
+	}
+
+	return dmarc, nil
 }

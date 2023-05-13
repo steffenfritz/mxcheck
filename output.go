@@ -40,6 +40,12 @@ func writeTSV(targetHostName string, runresult runresult, blacklist bool) error 
 		err = tsv.Write([]string{"DKIM Public Key", runresult.dkimresult.publicKey})
 	}
 
+	err = tsv.Write([]string{"DMARC Set", strconv.FormatBool(runresult.dmarcset)})
+	if runresult.dmarcset {
+		err = tsv.Write([]string{"DMARC Entry", runresult.dmarcfull})
+
+	}
+
 	for i, mxentry := range runresult.mxresults {
 		err = tsv.Write([]string{"MX Entry Seq Number ", strconv.Itoa(i)})
 		err = tsv.Write([]string{"MX Entry DNS", mxentry.mxentry})
