@@ -28,7 +28,7 @@ func writeTSV(targetHostName string, runresult runresult, blacklist bool) error 
 	err = tsv.Write([]string{"MailFrom", runresult.mailfrom})
 	err = tsv.Write([]string{"MailTo", runresult.mailto})
 	if !runresult.dkimresult.dkimset {
-		err = tsv.Write([]string{"DKIM Set", "false"})
+		err = tsv.Write([]string{"DKIM Set", "false or not checked"})
 	} else {
 		err = tsv.Write([]string{"DKIM Set", "true"})
 		err = tsv.Write([]string{"DKIM DNS Entry", runresult.dkimresult.domain})
