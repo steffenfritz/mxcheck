@@ -334,6 +334,7 @@ func main() {
 				}
 
 				// Recipient accepted
+				singlemx.fakercpt = orresult.rcptboolresult
 				if orresult.rcptboolresult {
 					InfoLogger.Println("Recipient accepted.")
 				} else {

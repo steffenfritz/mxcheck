@@ -28,7 +28,7 @@ func writeTSV(targetHostName string, runresult runresult, blacklist bool) error 
 	err = tsv.Write([]string{"MailFrom", runresult.mailfrom})
 	err = tsv.Write([]string{"MailTo", runresult.mailto})
 	if !runresult.dkimresult.dkimset {
-		err = tsv.Write([]string{"DKIM Set", "false"})
+		err = tsv.Write([]string{"DKIM Set", "false or not checked"})
 	} else {
 		err = tsv.Write([]string{"DKIM Set", "true"})
 		err = tsv.Write([]string{"DKIM DNS Entry", runresult.dkimresult.domain})
@@ -72,16 +72,16 @@ func writeTSV(targetHostName string, runresult runresult, blacklist bool) error 
 
 	if blacklist {
 		for bldns, blacklistresult := range runresult.bldnsnamelisted {
-			err = tsv.Write([]string{bldns + " lists ", blacklistresult})
+			err = tsv.Write([]string{"Blacklist " + bldns + " lists ", blacklistresult})
 		}
 		for bldns, blacklistresult := range runresult.bldnsnamenotlisted {
-			err = tsv.Write([]string{bldns + " does not list ", blacklistresult})
+			err = tsv.Write([]string{"Blacklist " + bldns + " does not list ", blacklistresult})
 		}
 		for bldns, blacklistresult := range runresult.bldnsiplisted {
-			err = tsv.Write([]string{bldns + " lists ", blacklistresult})
+			err = tsv.Write([]string{"Blacklist " + bldns + " lists ", blacklistresult})
 		}
 		for bldns, blacklistresult := range runresult.bldnsipnotlisted {
-			err = tsv.Write([]string{bldns + " does not list ", blacklistresult})
+			err = tsv.Write([]string{"Blacklist " + bldns + " does not list ", blacklistresult})
 		}
 	}
 
