@@ -14,7 +14,7 @@ It checks
 You can set mailFrom, mailTo, the DNS server, DKIM selector and output a report in tsv format.
 
 
-    -b, --blacklist           Check if the service is on blacklists
+    -b, --blacklist          Check if the service is on blacklists
     -d, --dnsserver string   The dns server to be requested (default "8.8.8.8")
     -f, --mailfrom string    Set the mailFrom address (default "info@foo.wtf")
     -t, --mailto string      Set the mailTo address (default "info@baz.wtf")
