@@ -30,7 +30,7 @@ mxcheck
 .SH SYNOPSIS
 .B mxcheck [OPTION]
 .SH DESCRIPTION
-mxcheck is an info scanner for e-mail servers. It checks the following DNS records: A, MX, PTR, SPF, MTA-STS and DKIM.
+mxcheck is an info scanner for e-mail servers. It checks the following DNS records: A, MX, PTR, SPF, MTA-STS, DKIM and DMARC.
 It also checks for StartTLS support and the validity of the certificate and if the VRFY command is supported.
 After scanning the tcp ports 25, 465 and 587 mxcheck checks if the e-mail server is an open relay by trying to send a single message.
 It also checks whether the service is blacklisted by querying public blacklist services.
