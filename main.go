@@ -77,6 +77,7 @@ func main() {
 	noprompt := flag.BoolP("no-prompt", "n", false, "Answer yes to all questions")
 	targetHostName := flag.StringP("service", "s", "",
 		"The service host to check")
+	updatecheck := flag.BoolP("updatecheck", "u", false, "Check for new version of mxcheck")
 	version := flag.BoolP("version", "v", false, "Version and license")
 	writetsv := flag.BoolP("write-tsv", "w", false, "Write tsv formated report to file")
 
@@ -84,6 +85,11 @@ func main() {
 
 	if *version {
 		fmt.Println(versionmsg)
+		return
+	}
+
+	if *updatecheck {
+		getLatestVersion()
 		return
 	}
 
