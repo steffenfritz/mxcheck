@@ -293,19 +293,19 @@ func main() {
 		singlemx.openports = openPorts
 
 		for _, port := range openPorts {
-			InfoLogger.Println("== Checking for open relay on port " + port + " ==")
-			orresult, err := openRelay(*mailFrom, *mailTo, targetHost, port)
-			if err != nil {
-				WarningLogger.Println(err.Error())
-			}
+			if port == "25" {
+				InfoLogger.Println("== Checking for open relay on port " + port + " ==")
+				orresult, err := openRelay(*mailFrom, *mailTo, targetHost, port)
+				if err != nil {
+					WarningLogger.Println(err.Error())
+				}
 
-			// Server string
-			if len(orresult.serverstring) > 0 {
-				InfoLogger.Printf("Server Banner: %s", orresult.serverstring)
-				singlemx.serverstring = strings.ReplaceAll(orresult.serverstring, "\r\n", "")
-			}
+				// Server string
+				if len(orresult.serverstring) > 0 {
+					InfoLogger.Printf("Server Banner: %s", orresult.serverstring)
+					singlemx.serverstring = strings.ReplaceAll(orresult.serverstring, "\r\n", "")
+				}
 
-			if port == "25" || port == "587" {
 				// STARTTLS test
 				singlemx.starttls = orresult.tlsbool
 				if orresult.tlsbool {
