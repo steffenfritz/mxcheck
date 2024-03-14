@@ -72,7 +72,7 @@ func openRelay(mailFrom string, mailTo string, targetHost string, targetPort str
 		}
 	}
 
-	// Get more info about the TLS connection
+	// Get more info about the StartTLS connection
 	versions := map[uint16]string{
 		tls.VersionSSL30: "SSL",
 		tls.VersionTLS10: "TLS 1.0",

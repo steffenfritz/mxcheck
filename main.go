@@ -311,14 +311,14 @@ func main() {
 				if orresult.tlsbool {
 					InfoLogger.Println(Green("STARTTLS supported"))
 					if orresult.tlsversion == "TLS 1.3" || orresult.tlsversion == "TLS 1.2" {
-						InfoLogger.Println(Green("Version: " + orresult.tlsversion))
+						InfoLogger.Println(Green("STARTTLS - TLS Version: " + orresult.tlsversion))
 					} else if orresult.tlsversion == "TLS 1.1" {
-						InfoLogger.Println(Yellow("Version: " + orresult.tlsversion))
+						InfoLogger.Println(Yellow("STARTTLS - TLS Version: " + orresult.tlsversion))
 					} else {
-						InfoLogger.Println("TLS Version: " + orresult.tlsversion)
+						InfoLogger.Println("STARTTLS - TLS Version: " + orresult.tlsversion)
 					}
 				} else {
-					InfoLogger.Println(Cyan("StartTLS not supported"))
+					InfoLogger.Println(Cyan("STARTTLS not supported"))
 				}
 
 				if orresult.tlsbool && orresult.tlsvalid {
@@ -333,7 +333,8 @@ func main() {
 
 			// TLS test
 			if port == "465" || port == "587" {
-				
+				InfoLogger.Println("== Checking for TLS support on port " + port + " ==")
+				tlsCheck(targetHost, port)
 			}
 
 			// VRFY test
