@@ -73,7 +73,7 @@ func openRelay(mailFrom string, mailTo string, targetHost string, targetPort str
 	}
 
 	// Get more info about the StartTLS connection
-	versions := map[uint16]string{
+	tlsversions := map[uint16]string{
 		tls.VersionSSL30: "SSL",
 		tls.VersionTLS10: "TLS 1.0",
 		tls.VersionTLS11: "TLS 1.1",
@@ -82,7 +82,7 @@ func openRelay(mailFrom string, mailTo string, targetHost string, targetPort str
 	}
 	if or.tlsbool {
 		tlsstate, _ := c.TLSConnectionState()
-		or.tlsversion = versions[tlsstate.Version]
+		or.tlsversion = tlsversions[tlsstate.Version]
 	}
 
 	// Check if server supports VRFY command. The

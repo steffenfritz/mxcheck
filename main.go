@@ -329,45 +329,46 @@ func main() {
 				if orresult.tlsbool && !orresult.tlsvalid {
 					InfoLogger.Println(Red("Certificate not valid"))
 				}
+
+				// VRFY test
+				singlemx.vrfysupport = orresult.vrfybool
+				if orresult.vrfybool {
+					InfoLogger.Println(Red("VRFY command supported."))
+				} else {
+					InfoLogger.Println(Green("VRFY command not supported."))
+				}
+
+				// Sender accepted
+				singlemx.fakesender = orresult.senderboolresult
+				if orresult.senderboolresult {
+					InfoLogger.Println("Fake sender accepted.")
+				} else {
+					InfoLogger.Println("Fake sender not accepted.")
+				}
+
+				// Recipient accepted
+				singlemx.fakercpt = orresult.rcptboolresult
+				if orresult.rcptboolresult {
+					InfoLogger.Println("Recipient accepted.")
+				} else {
+					InfoLogger.Println("Recipient not accepted. Skipped further open relay tests.")
+				}
+
+				// Open Relay test
+				if orresult.orboolresult {
+					singlemx.openrelay = true
+					InfoLogger.Println(Red("Server is probably an open relay"))
+				} else {
+					InfoLogger.Println(Green("Server is not an open relay"))
+				}
 			}
 
 			// TLS test
-			if port == "465" || port == "587" {
+			if port == "465" {
 				InfoLogger.Println("== Checking for TLS support on port " + port + " ==")
 				tlsCheck(targetHost, port)
 			}
 
-			// VRFY test
-			singlemx.vrfysupport = orresult.vrfybool
-			if orresult.vrfybool {
-				InfoLogger.Println(Red("VRFY command supported."))
-			} else {
-				InfoLogger.Println(Green("VRFY command not supported."))
-			}
-
-			// Sender accepted
-			singlemx.fakesender = orresult.senderboolresult
-			if orresult.senderboolresult {
-				InfoLogger.Println("Fake sender accepted.")
-			} else {
-				InfoLogger.Println("Fake sender not accepted.")
-			}
-
-			// Recipient accepted
-			singlemx.fakercpt = orresult.rcptboolresult
-			if orresult.rcptboolresult {
-				InfoLogger.Println("Recipient accepted.")
-			} else {
-				InfoLogger.Println("Recipient not accepted. Skipped further open relay tests.")
-			}
-
-			// Open Relay test
-			if orresult.orboolresult {
-				singlemx.openrelay = true
-				InfoLogger.Println(Red("Server is probably an open relay"))
-			} else {
-				InfoLogger.Println(Green("Server is not an open relay"))
-			}
 			runresult.mxresults = append(runresult.mxresults, singlemx)
 			println()
 		}
