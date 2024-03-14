@@ -293,23 +293,30 @@ func main() {
 		singlemx.openports = openPorts
 
 		for _, port := range openPorts {
-			if port == "25" {
-				InfoLogger.Println("== Checking for open relay ==")
-				orresult, err := openRelay(*mailFrom, *mailTo, targetHost)
-				if err != nil {
-					WarningLogger.Println(err.Error())
-				}
+			InfoLogger.Println("== Checking for open relay on port " + port + " ==")
+			orresult, err := openRelay(*mailFrom, *mailTo, targetHost, port)
+			if err != nil {
+				WarningLogger.Println(err.Error())
+			}
 
-				// Server string
-				if len(orresult.serverstring) > 0 {
-					InfoLogger.Printf("Server Banner: %s", orresult.serverstring)
-					singlemx.serverstring = strings.ReplaceAll(orresult.serverstring, "\r\n", "")
-				}
+			// Server string
+			if len(orresult.serverstring) > 0 {
+				InfoLogger.Printf("Server Banner: %s", orresult.serverstring)
+				singlemx.serverstring = strings.ReplaceAll(orresult.serverstring, "\r\n", "")
+			}
 
-				// TLS test
+			if port == "25" || port == "587" {
+				// STARTTLS test
 				singlemx.starttls = orresult.tlsbool
 				if orresult.tlsbool {
-					InfoLogger.Println(Green("StartTLS supported"))
+					InfoLogger.Println(Green("STARTTLS supported"))
+					if orresult.tlsversion == "TLS 1.3" || orresult.tlsversion == "TLS 1.2" {
+						InfoLogger.Println(Green("Version: " + orresult.tlsversion))
+					} else if orresult.tlsversion == "TLS 1.1" {
+						InfoLogger.Println(Yellow("Version: " + orresult.tlsversion))
+					} else {
+						InfoLogger.Println("TLS Version: " + orresult.tlsversion)
+					}
 				} else {
 					InfoLogger.Println(Cyan("StartTLS not supported"))
 				}
@@ -322,41 +329,46 @@ func main() {
 				if orresult.tlsbool && !orresult.tlsvalid {
 					InfoLogger.Println(Red("Certificate not valid"))
 				}
-
-				// VRFY test
-				singlemx.vrfysupport = orresult.vrfybool
-				if orresult.vrfybool {
-					InfoLogger.Println(Red("VRFY command supported."))
-				} else {
-					InfoLogger.Println(Green("VRFY command not supported."))
-				}
-
-				// Sender accepted
-				singlemx.fakesender = orresult.senderboolresult
-				if orresult.senderboolresult {
-					InfoLogger.Println("Fake sender accepted.")
-				} else {
-					InfoLogger.Println("Fake sender not accepted.")
-				}
-
-				// Recipient accepted
-				singlemx.fakercpt = orresult.rcptboolresult
-				if orresult.rcptboolresult {
-					InfoLogger.Println("Recipient accepted.")
-				} else {
-					InfoLogger.Println("Recipient not accepted. Skipped further open relay tests.")
-				}
-
-				// Open Relay test
-				if orresult.orboolresult {
-					singlemx.openrelay = true
-					InfoLogger.Println(Red("Server is probably an open relay"))
-				} else {
-					InfoLogger.Println(Green("Server is not an open relay"))
-				}
-				runresult.mxresults = append(runresult.mxresults, singlemx)
-				println()
 			}
+
+			// TLS test
+			if port == "465" || port == "587" {
+
+			}
+
+			// VRFY test
+			singlemx.vrfysupport = orresult.vrfybool
+			if orresult.vrfybool {
+				InfoLogger.Println(Red("VRFY command supported."))
+			} else {
+				InfoLogger.Println(Green("VRFY command not supported."))
+			}
+
+			// Sender accepted
+			singlemx.fakesender = orresult.senderboolresult
+			if orresult.senderboolresult {
+				InfoLogger.Println("Fake sender accepted.")
+			} else {
+				InfoLogger.Println("Fake sender not accepted.")
+			}
+
+			// Recipient accepted
+			singlemx.fakercpt = orresult.rcptboolresult
+			if orresult.rcptboolresult {
+				InfoLogger.Println("Recipient accepted.")
+			} else {
+				InfoLogger.Println("Recipient not accepted. Skipped further open relay tests.")
+			}
+
+			// Open Relay test
+			if orresult.orboolresult {
+				singlemx.openrelay = true
+				InfoLogger.Println(Red("Server is probably an open relay"))
+			} else {
+				InfoLogger.Println(Green("Server is not an open relay"))
+			}
+			runresult.mxresults = append(runresult.mxresults, singlemx)
+			println()
 		}
 	}
 

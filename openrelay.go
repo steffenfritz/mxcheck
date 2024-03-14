@@ -21,23 +21,24 @@ type openResult struct {
 	serverstring     string
 	tlsbool          bool
 	tlsvalid         bool
+	tlsversion       string
 	vrfybool         bool
 }
 
 // openRelay checks if a mail server sends email without
 // authentication and with a fake sender address.
 // It returns a struct:
-func openRelay(mailFrom string, mailTo string, targetHost string) (openResult, error) {
+func openRelay(mailFrom string, mailTo string, targetHost string, targetPort string) (openResult, error) {
 	//var orresult string
 	var or openResult
 
-	c, err := smtp.Dial(targetHost + ":25")
+	c, err := smtp.Dial(targetHost + ":" + targetPort)
 	if err != nil {
 		return or, err
 	}
 
 	// Print server string. You can trust the server string, but you shouldn't...
-	conn, err := net.DialTimeout("tcp", targetHost+":25", 15*time.Second)
+	conn, err := net.DialTimeout("tcp", targetHost+":"+targetPort, 15*time.Second)
 	defer conn.Close()
 
 	if err != nil {
@@ -54,11 +55,12 @@ func openRelay(mailFrom string, mailTo string, targetHost string) (openResult, e
 	// set default TLS config
 	tlsconfig := &tls.Config{ServerName: targetHost}
 
-	// a TLS check
+	// the overall STARTTLS check
 	err = c.StartTLS(tlsconfig)
 	if err == nil {
 		or.tlsbool = true
 		or.tlsvalid = true
+
 	} else {
 		// update config to ignore invalid TLS certificates and proceed
 		tlsconfig = &tls.Config{InsecureSkipVerify: true}
@@ -68,6 +70,19 @@ func openRelay(mailFrom string, mailTo string, targetHost string) (openResult, e
 			or.tlsbool = true
 			or.tlsvalid = false
 		}
+	}
+
+	// Get more info about the TLS connection
+	versions := map[uint16]string{
+		tls.VersionSSL30: "SSL",
+		tls.VersionTLS10: "TLS 1.0",
+		tls.VersionTLS11: "TLS 1.1",
+		tls.VersionTLS12: "TLS 1.2",
+		tls.VersionTLS13: "TLS 1.3",
+	}
+	if or.tlsbool {
+		tlsstate, _ := c.TLSConnectionState()
+		or.tlsversion = versions[tlsstate.Version]
 	}
 
 	// Check if server supports VRFY command. The
