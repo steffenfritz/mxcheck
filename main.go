@@ -292,10 +292,12 @@ func main() {
 		}
 		singlemx.openports = openPorts
 
+		var orresult openResult
+
 		for _, port := range openPorts {
 			if port == "25" {
 				InfoLogger.Println("== Checking for open relay on port " + port + " ==")
-				orresult, err := openRelay(*mailFrom, *mailTo, targetHost, port)
+				orresult, err = openRelay(*mailFrom, *mailTo, targetHost, port)
 				if err != nil {
 					WarningLogger.Println(err.Error())
 				}
@@ -307,26 +309,26 @@ func main() {
 				}
 
 				// STARTTLS test
-				singlemx.starttls = orresult.tlsbool
-				if orresult.tlsbool {
+				singlemx.starttls = orresult.starttlsbool
+				if orresult.starttlsbool {
 					InfoLogger.Println(Green("STARTTLS supported"))
-					if orresult.tlsversion == "TLS 1.3" || orresult.tlsversion == "TLS 1.2" {
-						InfoLogger.Println(Green("STARTTLS - TLS Version: " + orresult.tlsversion))
-					} else if orresult.tlsversion == "TLS 1.1" {
-						InfoLogger.Println(Yellow("STARTTLS - TLS Version: " + orresult.tlsversion))
+					if orresult.starttlsversion == "TLS 1.3" || orresult.starttlsversion == "TLS 1.2" {
+						InfoLogger.Println(Green("STARTTLS - TLS Version: " + orresult.starttlsversion))
+					} else if orresult.starttlsversion == "TLS 1.1" {
+						InfoLogger.Println(Yellow("STARTTLS - TLS Version: " + orresult.starttlsversion))
 					} else {
-						InfoLogger.Println("STARTTLS - TLS Version: " + orresult.tlsversion)
+						InfoLogger.Println("STARTTLS - TLS Version: " + orresult.starttlsversion)
 					}
 				} else {
 					InfoLogger.Println(Cyan("STARTTLS not supported"))
 				}
 
-				if orresult.tlsbool && orresult.tlsvalid {
+				if orresult.starttlsbool && orresult.starttlsvalid {
 					singlemx.tlscertvalid = true
 					InfoLogger.Println(Green("Certificate is valid"))
 				}
 
-				if orresult.tlsbool && !orresult.tlsvalid {
+				if orresult.starttlsbool && !orresult.starttlsvalid {
 					InfoLogger.Println(Red("Certificate not valid"))
 				}
 
@@ -362,15 +364,34 @@ func main() {
 					InfoLogger.Println(Green("Server is not an open relay"))
 				}
 			}
-
 			// TLS test
 			if port == "465" {
 				InfoLogger.Println("== Checking for TLS support on port " + port + " ==")
-				tlsCheck(targetHost, port)
-			}
+				orresult.tlsversion, orresult.tlsbool, orresult.tlsvalid, err = tlsCheck(targetHost, port)
+				if err != nil {
+					InfoLogger.Println(err)
+				}
+				if orresult.tlsbool {
+					InfoLogger.Println(Green("SMTPS supported"))
+					if orresult.tlsvalid {
+						InfoLogger.Println(Green("SMTPS TLS certificate valid"))
+					} else {
+						InfoLogger.Println(Yellow("SMTPS TLS certificate not valid"))
+					}
+					if orresult.tlsversion == "TLS 1.3" || orresult.tlsversion == "TLS 1.2" {
+						InfoLogger.Println(Green("SMTPS TLS Version: " + orresult.tlsversion))
+					} else if orresult.tlsversion == "TLS 1.1" {
+						InfoLogger.Println(Yellow("SMTPS TLS Version: " + orresult.tlsversion))
+					} else {
+						InfoLogger.Println("SMTPS TLS Version: " + orresult.tlsversion)
+					}
+				} else {
+					InfoLogger.Println(Cyan("SMTPS not supported"))
+				}
 
-			runresult.mxresults = append(runresult.mxresults, singlemx)
-			println()
+				runresult.mxresults = append(runresult.mxresults, singlemx)
+				println()
+			}
 		}
 	}
 

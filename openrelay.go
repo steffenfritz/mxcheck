@@ -19,6 +19,9 @@ type openResult struct {
 	senderresult     string
 	senderboolresult bool
 	serverstring     string
+	starttlsbool     bool
+	starttlsvalid    bool
+	starttlsversion  string
 	tlsbool          bool
 	tlsvalid         bool
 	tlsversion       string
@@ -58,8 +61,8 @@ func openRelay(mailFrom string, mailTo string, targetHost string, targetPort str
 	// the overall STARTTLS check
 	err = c.StartTLS(tlsconfig)
 	if err == nil {
-		or.tlsbool = true
-		or.tlsvalid = true
+		or.starttlsbool = true
+		or.starttlsvalid = true
 
 	} else {
 		// update config to ignore invalid TLS certificates and proceed
@@ -67,22 +70,15 @@ func openRelay(mailFrom string, mailTo string, targetHost string, targetPort str
 		err = c.StartTLS(tlsconfig)
 		// As there are no error types returned by the TLS client we need this ugly or. Should be fixed with a switch
 		if err == nil || strings.HasSuffix(err.Error(), "certificate name does not match input") {
-			or.tlsbool = true
-			or.tlsvalid = false
+			or.starttlsbool = true
+			or.starttlsvalid = false
 		}
 	}
 
 	// Get more info about the StartTLS connection
-	tlsversions := map[uint16]string{
-		tls.VersionSSL30: "SSL",
-		tls.VersionTLS10: "TLS 1.0",
-		tls.VersionTLS11: "TLS 1.1",
-		tls.VersionTLS12: "TLS 1.2",
-		tls.VersionTLS13: "TLS 1.3",
-	}
-	if or.tlsbool {
+	if or.starttlsbool {
 		tlsstate, _ := c.TLSConnectionState()
-		or.tlsversion = tlsversions[tlsstate.Version]
+		or.starttlsversion = tlsversions[tlsstate.Version]
 	}
 
 	// Check if server supports VRFY command. The
