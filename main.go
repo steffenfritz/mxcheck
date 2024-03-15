@@ -308,38 +308,6 @@ func main() {
 					singlemx.serverstring = strings.ReplaceAll(orresult.serverstring, "\r\n", "")
 				}
 
-				// STARTTLS test
-				singlemx.starttls = orresult.starttlsbool
-				if orresult.starttlsbool {
-					InfoLogger.Println(Green("STARTTLS supported"))
-					if orresult.starttlsversion == "TLS 1.3" || orresult.starttlsversion == "TLS 1.2" {
-						InfoLogger.Println(Green("STARTTLS - TLS Version: " + orresult.starttlsversion))
-					} else if orresult.starttlsversion == "TLS 1.1" {
-						InfoLogger.Println(Yellow("STARTTLS - TLS Version: " + orresult.starttlsversion))
-					} else {
-						InfoLogger.Println("STARTTLS - TLS Version: " + orresult.starttlsversion)
-					}
-				} else {
-					InfoLogger.Println(Cyan("STARTTLS not supported"))
-				}
-
-				if orresult.starttlsbool && orresult.starttlsvalid {
-					singlemx.tlscertvalid = true
-					InfoLogger.Println(Green("Certificate is valid"))
-				}
-
-				if orresult.starttlsbool && !orresult.starttlsvalid {
-					InfoLogger.Println(Red("Certificate not valid"))
-				}
-
-				// VRFY test
-				singlemx.vrfysupport = orresult.vrfybool
-				if orresult.vrfybool {
-					InfoLogger.Println(Red("VRFY command supported."))
-				} else {
-					InfoLogger.Println(Green("VRFY command not supported."))
-				}
-
 				// Sender accepted
 				singlemx.fakesender = orresult.senderboolresult
 				if orresult.senderboolresult {
@@ -363,6 +331,41 @@ func main() {
 				} else {
 					InfoLogger.Println(Green("Server is not an open relay"))
 				}
+
+				// STARTTLS test
+				InfoLogger.Println("== Checking for STARTTLS on port 25 ==")
+
+				singlemx.starttls = orresult.starttlsbool
+				if orresult.starttlsbool {
+					InfoLogger.Println(Green("STARTTLS supported"))
+					if orresult.starttlsversion == "TLS 1.3" || orresult.starttlsversion == "TLS 1.2" {
+						InfoLogger.Println(Green("STARTTLS - TLS Version: " + orresult.starttlsversion))
+					} else if orresult.starttlsversion == "TLS 1.1" {
+						InfoLogger.Println(Yellow("STARTTLS - TLS Version: " + orresult.starttlsversion))
+					} else {
+						InfoLogger.Println("STARTTLS - TLS Version: " + orresult.starttlsversion)
+					}
+				} else {
+					InfoLogger.Println(Cyan("STARTTLS not supported"))
+				}
+
+				if orresult.starttlsbool && orresult.starttlsvalid {
+					singlemx.tlscertvalid = true
+					InfoLogger.Println(Green("Certificate is valid"))
+				}
+
+				if orresult.starttlsbool && !orresult.starttlsvalid {
+					InfoLogger.Println(Red("Certificate not valid"))
+				}
+				// VRFY test
+				InfoLogger.Println("== Checking for VRFY support ==")
+				singlemx.vrfysupport = orresult.vrfybool
+				if orresult.vrfybool {
+					InfoLogger.Println(Red("VRFY command supported."))
+				} else {
+					InfoLogger.Println(Green("VRFY command not supported."))
+				}
+
 			}
 			// TLS test
 			if port == "465" {
