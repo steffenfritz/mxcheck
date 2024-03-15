@@ -1,4 +1,4 @@
-.\" Copyright (c) 2019-2023, Steffen Fritz
+.\" Copyright (c) 2019-2024, Steffen Fritz
 .\"
 .\" %%%LICENSE_START(GPLv2+_DOC_FULL)
 .\" This is free documentation; you can redistribute it and/or
@@ -22,7 +22,7 @@
 .\" %%%LICENSE_END
 
 
-.TH mxcheck 1 "June 2023" "version 1.5.2"
+.TH mxcheck 1 "June 2023" "version 1.6.0"
 
 
 .SH NAME
@@ -31,7 +31,7 @@ mxcheck
 .B mxcheck [OPTION]
 .SH DESCRIPTION
 mxcheck is an info scanner for e-mail servers. It checks the following DNS records: A, MX, PTR, SPF, MTA-STS, DKIM and DMARC.
-It also checks for StartTLS support and the validity of the certificate and if the VRFY command is supported.
+It also checks for StartTLS support and the validity of the certificate, TLS versions, and if the VRFY command is supported.
 After scanning the tcp ports 25, 465 and 587 mxcheck checks if the e-mail server is an open relay by trying to send a single message.
 It also checks whether the service is blacklisted by querying public blacklist services.
 
