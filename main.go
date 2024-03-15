@@ -34,22 +34,25 @@ type runresult struct {
 
 // mxresult is used to store a mx scan result for further processing
 type mxresult struct {
-	mxentry      string
-	ipaddr       string
-	asnum        int
-	ascountry    string
-	ptrentry     string
-	ptrmatch     bool
-	serverstring string
-	spfset       bool
-	stsset       bool
-	openports    []string
-	fakesender   bool
-	fakercpt     bool
-	starttls     bool
-	tlscertvalid bool
-	openrelay    bool
-	vrfysupport  bool
+	mxentry         string
+	ipaddr          string
+	asnum           int
+	ascountry       string
+	ptrentry        string
+	ptrmatch        bool
+	serverstring    string
+	spfset          bool
+	stsset          bool
+	openports       []string
+	fakesender      bool
+	fakercpt        bool
+	starttls        bool
+	starttlsversion string
+	tlscertvalid    bool
+	tlsversion      string
+	smtps           bool
+	openrelay       bool
+	vrfysupport     bool
 }
 
 var (
@@ -336,6 +339,7 @@ func main() {
 				InfoLogger.Println("== Checking for STARTTLS on port 25 ==")
 
 				singlemx.starttls = orresult.starttlsbool
+				singlemx.starttlsversion = orresult.starttlsversion
 				if orresult.starttlsbool {
 					InfoLogger.Println(Green("STARTTLS supported"))
 					if orresult.starttlsversion == "TLS 1.3" || orresult.starttlsversion == "TLS 1.2" {
@@ -374,6 +378,7 @@ func main() {
 				if err != nil {
 					InfoLogger.Println(err)
 				}
+				singlemx.tlsversion = orresult.tlsversion
 				if orresult.tlsbool {
 					InfoLogger.Println(Green("SMTPS supported"))
 					if orresult.tlsvalid {

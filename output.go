@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"io"
 	"os"
+	"slices"
 	"strconv"
 	"time"
 )
@@ -62,8 +63,12 @@ func writeTSV(targetHostName string, runresult runresult, blacklist bool) error 
 		err = tsv.Write([]string{"PTR Match", strconv.FormatBool(mxentry.ptrmatch)})
 		err = tsv.Write([]string{"SPF Set", strconv.FormatBool(mxentry.spfset)})
 		err = tsv.Write([]string{"MTA-STS Set", strconv.FormatBool(mxentry.stsset)})
-		err = tsv.Write([]string{"STARTTLS Supported", strconv.FormatBool(mxentry.starttls)})
+		err = tsv.Write([]string{"STARTTLS PORT 25 Supported", strconv.FormatBool(mxentry.starttls)})
+		err = tsv.Write([]string{"STARTTLS TLS Version", mxentry.starttlsversion})
 		err = tsv.Write([]string{"Certificate Valid", strconv.FormatBool(mxentry.tlscertvalid)})
+		if slices.Contains(mxentry.openports, "465") {
+			err = tsv.Write([]string{"TLS Version PORT 465 ", mxentry.tlsversion})
+		}
 		err = tsv.Write([]string{"VRFY Supported", strconv.FormatBool(mxentry.vrfysupport)})
 		err = tsv.Write([]string{"Fake Sender Accepted", strconv.FormatBool(mxentry.fakesender)})
 		err = tsv.Write([]string{"Fake Recipient Accepted", strconv.FormatBool(mxentry.fakercpt)})
