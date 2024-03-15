@@ -19,25 +19,29 @@ type openResult struct {
 	senderresult     string
 	senderboolresult bool
 	serverstring     string
+	starttlsbool     bool
+	starttlsvalid    bool
+	starttlsversion  string
 	tlsbool          bool
 	tlsvalid         bool
+	tlsversion       string
 	vrfybool         bool
 }
 
 // openRelay checks if a mail server sends email without
 // authentication and with a fake sender address.
 // It returns a struct:
-func openRelay(mailFrom string, mailTo string, targetHost string) (openResult, error) {
+func openRelay(mailFrom string, mailTo string, targetHost string, targetPort string) (openResult, error) {
 	//var orresult string
 	var or openResult
 
-	c, err := smtp.Dial(targetHost + ":25")
+	c, err := smtp.Dial(targetHost + ":" + targetPort)
 	if err != nil {
 		return or, err
 	}
 
 	// Print server string. You can trust the server string, but you shouldn't...
-	conn, err := net.DialTimeout("tcp", targetHost+":25", 15*time.Second)
+	conn, err := net.DialTimeout("tcp", targetHost+":"+targetPort, 15*time.Second)
 	defer conn.Close()
 
 	if err != nil {
@@ -54,20 +58,27 @@ func openRelay(mailFrom string, mailTo string, targetHost string) (openResult, e
 	// set default TLS config
 	tlsconfig := &tls.Config{ServerName: targetHost}
 
-	// a TLS check
+	// the overall STARTTLS check
 	err = c.StartTLS(tlsconfig)
 	if err == nil {
-		or.tlsbool = true
-		or.tlsvalid = true
+		or.starttlsbool = true
+		or.starttlsvalid = true
+
 	} else {
 		// update config to ignore invalid TLS certificates and proceed
 		tlsconfig = &tls.Config{InsecureSkipVerify: true}
 		err = c.StartTLS(tlsconfig)
 		// As there are no error types returned by the TLS client we need this ugly or. Should be fixed with a switch
 		if err == nil || strings.HasSuffix(err.Error(), "certificate name does not match input") {
-			or.tlsbool = true
-			or.tlsvalid = false
+			or.starttlsbool = true
+			or.starttlsvalid = false
 		}
+	}
+
+	// Get more info about the StartTLS connection
+	if or.starttlsbool {
+		tlsstate, _ := c.TLSConnectionState()
+		or.starttlsversion = tlsversions[tlsstate.Version]
 	}
 
 	// Check if server supports VRFY command. The

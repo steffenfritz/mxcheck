@@ -34,22 +34,25 @@ type runresult struct {
 
 // mxresult is used to store a mx scan result for further processing
 type mxresult struct {
-	mxentry      string
-	ipaddr       string
-	asnum        int
-	ascountry    string
-	ptrentry     string
-	ptrmatch     bool
-	serverstring string
-	spfset       bool
-	stsset       bool
-	openports    []string
-	fakesender   bool
-	fakercpt     bool
-	starttls     bool
-	tlscertvalid bool
-	openrelay    bool
-	vrfysupport  bool
+	mxentry         string
+	ipaddr          string
+	asnum           int
+	ascountry       string
+	ptrentry        string
+	ptrmatch        bool
+	serverstring    string
+	spfset          bool
+	stsset          bool
+	openports       []string
+	fakesender      bool
+	fakercpt        bool
+	starttls        bool
+	starttlsversion string
+	tlscertvalid    bool
+	tlsversion      string
+	smtps           bool
+	openrelay       bool
+	vrfysupport     bool
 }
 
 var (
@@ -292,10 +295,12 @@ func main() {
 		}
 		singlemx.openports = openPorts
 
+		var orresult openResult
+
 		for _, port := range openPorts {
 			if port == "25" {
-				InfoLogger.Println("== Checking for open relay ==")
-				orresult, err := openRelay(*mailFrom, *mailTo, targetHost)
+				InfoLogger.Println("== Checking for open relay on port " + port + " ==")
+				orresult, err = openRelay(*mailFrom, *mailTo, targetHost, port)
 				if err != nil {
 					WarningLogger.Println(err.Error())
 				}
@@ -304,31 +309,6 @@ func main() {
 				if len(orresult.serverstring) > 0 {
 					InfoLogger.Printf("Server Banner: %s", orresult.serverstring)
 					singlemx.serverstring = strings.ReplaceAll(orresult.serverstring, "\r\n", "")
-				}
-
-				// TLS test
-				singlemx.starttls = orresult.tlsbool
-				if orresult.tlsbool {
-					InfoLogger.Println(Green("StartTLS supported"))
-				} else {
-					InfoLogger.Println(Cyan("StartTLS not supported"))
-				}
-
-				if orresult.tlsbool && orresult.tlsvalid {
-					singlemx.tlscertvalid = true
-					InfoLogger.Println(Green("Certificate is valid"))
-				}
-
-				if orresult.tlsbool && !orresult.tlsvalid {
-					InfoLogger.Println(Red("Certificate not valid"))
-				}
-
-				// VRFY test
-				singlemx.vrfysupport = orresult.vrfybool
-				if orresult.vrfybool {
-					InfoLogger.Println(Red("VRFY command supported."))
-				} else {
-					InfoLogger.Println(Green("VRFY command not supported."))
 				}
 
 				// Sender accepted
@@ -354,6 +334,69 @@ func main() {
 				} else {
 					InfoLogger.Println(Green("Server is not an open relay"))
 				}
+
+				// STARTTLS test
+				InfoLogger.Println("== Checking for STARTTLS on port 25 ==")
+
+				singlemx.starttls = orresult.starttlsbool
+				singlemx.starttlsversion = orresult.starttlsversion
+				if orresult.starttlsbool {
+					InfoLogger.Println(Green("STARTTLS supported"))
+					if orresult.starttlsversion == "TLS 1.3" || orresult.starttlsversion == "TLS 1.2" {
+						InfoLogger.Println(Green("STARTTLS - TLS Version: " + orresult.starttlsversion))
+					} else if orresult.starttlsversion == "TLS 1.1" {
+						InfoLogger.Println(Yellow("STARTTLS - TLS Version: " + orresult.starttlsversion))
+					} else {
+						InfoLogger.Println("STARTTLS - TLS Version: " + orresult.starttlsversion)
+					}
+				} else {
+					InfoLogger.Println(Cyan("STARTTLS not supported"))
+				}
+
+				if orresult.starttlsbool && orresult.starttlsvalid {
+					singlemx.tlscertvalid = true
+					InfoLogger.Println(Green("Certificate is valid"))
+				}
+
+				if orresult.starttlsbool && !orresult.starttlsvalid {
+					InfoLogger.Println(Red("Certificate not valid"))
+				}
+				// VRFY test
+				InfoLogger.Println("== Checking for VRFY support ==")
+				singlemx.vrfysupport = orresult.vrfybool
+				if orresult.vrfybool {
+					InfoLogger.Println(Red("VRFY command supported."))
+				} else {
+					InfoLogger.Println(Green("VRFY command not supported."))
+				}
+
+			}
+			// TLS test
+			if port == "465" {
+				InfoLogger.Println("== Checking for TLS support on port " + port + " ==")
+				orresult.tlsversion, orresult.tlsbool, orresult.tlsvalid, err = tlsCheck(targetHost, port)
+				if err != nil {
+					InfoLogger.Println(err)
+				}
+				singlemx.tlsversion = orresult.tlsversion
+				if orresult.tlsbool {
+					InfoLogger.Println(Green("SMTPS supported"))
+					if orresult.tlsvalid {
+						InfoLogger.Println(Green("SMTPS TLS certificate valid"))
+					} else {
+						InfoLogger.Println(Yellow("SMTPS TLS certificate not valid"))
+					}
+					if orresult.tlsversion == "TLS 1.3" || orresult.tlsversion == "TLS 1.2" {
+						InfoLogger.Println(Green("SMTPS TLS Version: " + orresult.tlsversion))
+					} else if orresult.tlsversion == "TLS 1.1" {
+						InfoLogger.Println(Yellow("SMTPS TLS Version: " + orresult.tlsversion))
+					} else {
+						InfoLogger.Println("SMTPS TLS Version: " + orresult.tlsversion)
+					}
+				} else {
+					InfoLogger.Println(Cyan("SMTPS not supported"))
+				}
+
 				runresult.mxresults = append(runresult.mxresults, singlemx)
 				println()
 			}
