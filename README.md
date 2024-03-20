@@ -77,5 +77,3 @@ mxcheck has a man page :)
 Furthermore, you can find a documentation and contact information here: https://mxcheck.fritz.wtf
 
 The logo was created by Alex/Lignum5. Thanks, mate :)
-
-The development of this project is supported by the license for Open Source projects from Jetbrains: https://jb.gg/OpenSourceSupport
