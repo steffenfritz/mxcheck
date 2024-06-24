@@ -231,6 +231,7 @@ func getDMARC(targetHostName string, dnsServer string) (dmarc, error) {
 	dmarcdomain := "_dmarc." + targetHostName
 
 	m := new(dns.Msg)
+	// ToDo: Implement check if type is not TXT but CNAME
 	m.SetQuestion(dns.Fqdn(dmarcdomain), dns.TypeTXT)
 
 	c := new(dns.Client)
