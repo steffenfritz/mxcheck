@@ -29,7 +29,7 @@ You can set mailFrom, mailTo, the DNS server, DKIM selector and output a report 
 
 # Version
 
-v1.6.0-BETA-1
+v1.6.0
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/steffenfritz/mxcheck)](https://goreportcard.com/report/github.com/steffenfritz/mxcheck) 
 [![Go Reference](https://pkg.go.dev/badge/github.com/steffenfritz/mxcheck.svg)](https://pkg.go.dev/github.com/steffenfritz/mxcheck)
