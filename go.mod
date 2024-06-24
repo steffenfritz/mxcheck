@@ -12,7 +12,9 @@ require (
 require (
 	github.com/pkg/errors v0.9.1 // indirect
 	golang.org/x/mod v0.13.0 // indirect
-	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/net v0.23.0 // indirect; manual update due to a security issue in older versions
+	// golang.org/x/net v0.17.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/tools v0.14.0 // indirect
+
 )
