@@ -1,10 +1,10 @@
 package main
 
 // Version is used by the Makefile to set the version
-var Version string
+var Version string = "v1.6.1"
 
 // Build is used by the Makefile to set the build, i.e. short git fingerprint
-var Build string
+// var Build string
 
 var info = "mxcheck --  Copyright (C) 2019-2024  Steffen Fritz"
 
@@ -14,4 +14,4 @@ redistribute it under certain conditions. See license file.`
 
 var contact = `For bugs and feature requests use the tracker at github.com/steffenfritz/mxcheck`
 
-var versionmsg = info + "\n\nVersion: " + Version + "\nBuild:   " + Build + "\n\n" + license + "\n\n" + contact + "\n"
+var versionmsg = info + "\n\nVersion: " + Version + "\n\n" + license + "\n\n" + contact + "\n"

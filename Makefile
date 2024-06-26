@@ -2,7 +2,7 @@ ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
 BINARY=mxcheck
 
-VERSION=v1.6.0
+VERSION=v1.6.1
 
 
 BUILD=`git rev-parse --short HEAD`
