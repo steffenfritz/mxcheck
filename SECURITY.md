@@ -11,7 +11,9 @@
 
 ## Reporting a Vulnerability
 
-Please send an e-mail to security AT fritz DOT wtf
+You can report vulnerabilities privately via the _Issues_ tab and then select _New Issue_ and _Report a security vulnerability_. For more information and how to fork und pull-request privately you find more information here: https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability
+
+You can also send an e-mail to security AT fritz DOT wtf
 
 ## GnuPG Key
 
