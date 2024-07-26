@@ -1,0 +1,9 @@
+20240624
+  
+  Version: v1.6.1
+  Notes:
+    This is a release to streamline the build process with Debian. 
+    Version is not set by make and build information is omitted as the fingerprint would be different in different scenarios.
+
+    No bug fixes
+    No features added
