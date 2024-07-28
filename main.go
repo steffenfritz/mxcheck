@@ -92,7 +92,10 @@ func main() {
 	}
 
 	if *updatecheck {
-		getLatestVersion()
+		err := getLatestVersion()
+		if err != nil {
+			ErrorLogger.Println("Error getting latest version:", err)
+		}
 		return
 	}
 

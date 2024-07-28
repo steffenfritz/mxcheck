@@ -1,0 +1,59 @@
+name: buildstatus
+
+on:
+  push:
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE'
+      - 'workflows'
+      - 'SECURITY.md'
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  xgo:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+      - 
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21.x'
+      - name: Install dependencies
+        run: go get .
+      -
+        name: Test
+        run: go test -v
+      -
+        name: Build
+        uses: crazy-max/ghaction-xgo@682253ce1d3dd7a78c5120c703c9f3811dbf8cb2 # v3.0.0
+        with:
+          xgo_version: latest
+          go_version: 1.21
+          dest: build
+          prefix: mxcheck
+          targets: windows/amd64,linux/amd64
+          v: true
+          x: false
+          race: false
+          ldflags: -s -w
+          buildmode: default
+          trimpath: true
+          pkg: ./mxcheck
