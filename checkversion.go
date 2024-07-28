@@ -9,7 +9,8 @@ type MXCVersion struct {
 	Tag_name string
 }
 
-func getLatestVersion() {
+func getLatestVersion() error {
+	var err error
 	url := "https://api.github.com/repos/steffenfritz/mxcheck/releases/latest"
 	resp, err := http.Get(url)
 	if err != nil {
@@ -30,4 +31,6 @@ func getLatestVersion() {
 		InfoLogger.Println("Installed version: " + Version)
 		InfoLogger.Println("Available version: " + mxcv.Tag_name)
 	}
+
+	return err
 }
