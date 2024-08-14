@@ -40,7 +40,7 @@ v1.6.1
 
 # Installation
 
-    go install github.com/steffenfritz/mxcheck
+    go install github.com/steffenfritz/mxcheck@latest
     
 or
 
