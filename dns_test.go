@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/miekg/dns"
 	"reflect"
 	"testing"
+
+	"github.com/miekg/dns"
 )
 
 func Test_getA(t *testing.T) {
@@ -18,7 +19,7 @@ func Test_getA(t *testing.T) {
 		want    string
 		wantErr bool
 	}{
-		{"getA", args{dns.Fqdn("fritz.wtf"), "9.9.9.9"}, "159.69.212.31", false},
+		{"getA", args{dns.Fqdn("fritz.wtf"), "8.8.8.8"}, "159.69.212.31", false},
 	}
 	for _, tt := range tests {
 		println(tt.args.targetHostName)
@@ -47,7 +48,7 @@ func Test_getDKIM(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"DKIM", args{selector: "default", targetHostName: "mail.fritz.wtf", dnsServer: "9.9.9.9"}, false},
+		{"DKIM", args{selector: "default", targetHostName: "mail.fritz.wtf", dnsServer: "8.8.8.8"}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -98,7 +99,7 @@ func Test_getMTASTS(t *testing.T) {
 		want    bool
 		wantErr bool
 	}{
-		{"MTASTS", args{"fritz.wtf", "9.9.9.9"}, true, false},
+		{"MTASTS", args{"fritz.wtf", "8.8.8.8"}, true, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -129,7 +130,7 @@ func Test_getMX(t *testing.T) {
 		want1   bool
 		wantErr bool
 	}{
-		{"getMX", args{&host, "9.9.9.9"}, []string{"mail.fritz.wtf."}, true, false},
+		{"getMX", args{&host, "8.8.8.8"}, []string{"mail.fritz.wtf."}, true, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -159,7 +160,7 @@ func Test_getPTR(t *testing.T) {
 		want    string
 		wantErr bool
 	}{
-		{"PTR", args{"159.69.212.31", "9.9.9.9"}, "mail.fritz.wtf.", false},
+		{"PTR", args{"159.69.212.31", "8.8.8.8"}, "mail.fritz.wtf.", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -186,7 +187,7 @@ func Test_getSPF(t *testing.T) {
 		want    bool
 		wantErr bool
 	}{
-		{"SPF", args{"fritz.wtf", "9.9.9.9"}, true, false},
+		{"SPF", args{"fritz.wtf", "8.8.8.8"}, true, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
