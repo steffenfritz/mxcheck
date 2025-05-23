@@ -119,11 +119,12 @@ func getSPF(targetHostName string, dnsServer string) (bool, string, error) {
 
 	if len(in.Answer) != 0 {
 		for n := range in.Answer {
-			t := *in.Answer[n].(*dns.TXT)
-			for _, v := range t.Txt {
-				if strings.HasPrefix(v, "v=spf1") {
-					spf = true
-					spfanswer = in.Answer[n].String()
+			if t, ok := in.Answer[n].(*dns.TXT); ok {
+				for _, v := range t.Txt {
+					if strings.HasPrefix(v, "v=spf1") {
+						spf = true
+						spfanswer = in.Answer[n].String()
+					}
 				}
 			}
 		}
@@ -151,10 +152,11 @@ func getMTASTS(targetHostName string, dnsServer string) (bool, error) {
 
 	if len(in.Answer) != 0 {
 		for n := range in.Answer {
-			t := *in.Answer[n].(*dns.TXT)
-			for _, v := range t.Txt {
-				if strings.HasPrefix(v, "v=STSv1") {
-					mtasts = true
+			if t, ok := in.Answer[n].(*dns.TXT); ok {
+				for _, v := range t.Txt {
+					if strings.HasPrefix(v, "v=STSv1") {
+						mtasts = true
+					}
 				}
 			}
 		}
@@ -183,37 +185,38 @@ func getDKIM(selector string, targetHostName string, dnsServer string) (dkim, er
 
 	if len(in.Answer) != 0 {
 		for n := range in.Answer {
-			t := *in.Answer[n].(*dns.TXT)
-			for _, v := range t.Txt {
-				if strings.HasPrefix(v, "v=DKIM1") {
-					dkimSplit := strings.Fields(v)
-					dkim.dkimset = true
-					dkim.selector = selector
-					dkim.version = "1"
-					for _, partDKIM := range dkimSplit {
-						if strings.HasPrefix(partDKIM, "g=") {
-							dkim.granularity = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
-							continue
-						}
-						if strings.HasPrefix(partDKIM, "h=") {
-							dkim.accepAlgo = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
-							continue
-						}
-						if strings.HasPrefix(partDKIM, "k=") {
-							dkim.keyType = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
-							continue
-						}
-						if strings.HasPrefix(partDKIM, "n=") {
-							dkim.noteField = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
-							continue
-						}
-						if strings.HasPrefix(partDKIM, "p=") {
-							dkim.publicKey = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
-							continue
-						}
-						if strings.HasPrefix(partDKIM, "t=") {
-							dkim.testing = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
-							continue
+			if t, ok := in.Answer[n].(*dns.TXT); ok {
+				for _, v := range t.Txt {
+					if strings.HasPrefix(v, "v=DKIM1") {
+						dkimSplit := strings.Fields(v)
+						dkim.dkimset = true
+						dkim.selector = selector
+						dkim.version = "1"
+						for _, partDKIM := range dkimSplit {
+							if strings.HasPrefix(partDKIM, "g=") {
+								dkim.granularity = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
+								continue
+							}
+							if strings.HasPrefix(partDKIM, "h=") {
+								dkim.accepAlgo = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
+								continue
+							}
+							if strings.HasPrefix(partDKIM, "k=") {
+								dkim.keyType = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
+								continue
+							}
+							if strings.HasPrefix(partDKIM, "n=") {
+								dkim.noteField = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
+								continue
+							}
+							if strings.HasPrefix(partDKIM, "p=") {
+								dkim.publicKey = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
+								continue
+							}
+							if strings.HasPrefix(partDKIM, "t=") {
+								dkim.testing = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
+								continue
+							}
 						}
 					}
 				}
@@ -243,11 +246,12 @@ func getDMARC(targetHostName string, dnsServer string) (dmarc, error) {
 
 	if len(in.Answer) != 0 {
 		for n := range in.Answer {
-			t := *in.Answer[n].(*dns.TXT)
-			for _, v := range t.Txt {
-				if strings.Contains(v, "v=DMARC1") {
-					dmarc.dmarcset = true
-					dmarc.dmarcfull = in.Answer[n].String()
+			if t, ok := in.Answer[n].(*dns.TXT); ok {
+				for _, v := range t.Txt {
+					if strings.Contains(v, "v=DMARC1") {
+						dmarc.dmarcset = true
+						dmarc.dmarcfull = in.Answer[n].String()
+					}
 				}
 			}
 		}
