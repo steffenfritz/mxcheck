@@ -16,6 +16,7 @@ You can set mailFrom, mailTo, the DNS server, DKIM selector and output a report 
 
     -b, --blacklist          Check if the service is on blacklists
     -d, --dnsserver string   The dns server to be requested (default "8.8.8.8")
+    -p, --disable-port-scan  Disable SMTP port scan
     -f, --mailfrom string    Set the mailFrom address (default "info@foo.wtf")
     -t, --mailto string      Set the mailTo address (default "info@baz.wtf")
     -n, --no-prompt          Answer yes to all questions
@@ -29,7 +30,7 @@ You can set mailFrom, mailTo, the DNS server, DKIM selector and output a report 
 
 # Version
 
-v1.6.2
+v1.7.0
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/steffenfritz/mxcheck)](https://goreportcard.com/report/github.com/steffenfritz/mxcheck) 
 [![Go Reference](https://pkg.go.dev/badge/github.com/steffenfritz/mxcheck.svg)](https://pkg.go.dev/github.com/steffenfritz/mxcheck)
@@ -40,7 +41,7 @@ v1.6.2
 
 # Installation
 
-    go install github.com/steffenfritz/mxcheck@latest
+    go install github.com/steffenfritz/mxcheck@v1.7.0
     
 or
 
