@@ -37,6 +37,7 @@ v1.7.0
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Build status](https://ci.appveyor.com/api/projects/status/l6d32n4ax02f6ku2?svg=true)](https://ci.appveyor.com/project/steffenfritz/mxcheck)
 [![Reviewed by Hound](https://img.shields.io/badge/Reviewed_by-Hound-8E64B0.svg)](https://houndci.com)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/steffenfritz/mxcheck/badge)](https://scorecard.dev/viewer/?uri=github.com/steffenfritz/mxcheck)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/9171/badge)](https://www.bestpractices.dev/projects/9171)
 
 # Installation
