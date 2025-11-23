@@ -117,7 +117,7 @@ func openRelay(mailFrom string, mailTo string, targetHost string, targetPort str
 	// Write test message, close and quit
 	// If we can write the message to wc we
 	// set the orboolresult to true
-	_, err = fmt.Fprintf(wc, "From: <"+mailFrom+">\n\n"+"This server is an open relay")
+	_, err = fmt.Fprintf(wc, "From: <%s>\n\nThis server is an open relay", mailFrom)
 	orerr := wc.Close()
 	if orerr != nil {
 		or.orresult = orerr.Error()
