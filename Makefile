@@ -1,6 +1,6 @@
 ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 BINARY=mxcheck
-VERSION=v1.7.0
+VERSION=v1.8.0
 
 BUILD=$(shell git rev-parse --short HEAD)
 PLATFORMS=darwin linux windows

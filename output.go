@@ -70,6 +70,8 @@ func writeTSV(targetHostName string, runresult runresult, blacklist bool) error 
 			err = tsv.Write([]string{"TLS Version PORT 465 ", mxentry.tlsversion})
 		}
 		err = tsv.Write([]string{"VRFY Supported", strconv.FormatBool(mxentry.vrfysupport)})
+		err = tsv.Write([]string{"SMTP Smuggling Vulnerability", strconv.FormatBool(mxentry.smugglevuln)})
+		err = tsv.Write([]string{"SMTP Smuggling Response", mxentry.smuggleresp})
 		err = tsv.Write([]string{"Fake Sender Accepted", strconv.FormatBool(mxentry.fakesender)})
 		err = tsv.Write([]string{"Fake Recipient Accepted", strconv.FormatBool(mxentry.fakercpt)})
 		err = tsv.Write([]string{"Open Relay", strconv.FormatBool(mxentry.openrelay)})
