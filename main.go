@@ -53,6 +53,9 @@ type mxresult struct {
 	smtps           bool
 	openrelay       bool
 	vrfysupport     bool
+	smugglevuln     bool
+	smuggleresp     string
+	smuggleerror    string
 }
 
 var (
@@ -79,6 +82,7 @@ func main() {
 	mailFrom := flag.StringP("mailfrom", "f", "info@foo.wtf", "Set the mailFrom address")
 	mailTo := flag.StringP("mailto", "t", "info@baz.wtf", "Set the mailTo address")
 	noprompt := flag.BoolP("no-prompt", "n", false, "Answer yes to all questions")
+	smtpsmuggle := flag.BoolP("smuggle", "G", false, "Test for SMTPSmuggling vulnerability")
 	targetHostName := flag.StringP("service", "s", "",
 		"The service host to check")
 	updatecheck := flag.BoolP("updatecheck", "u", false, "Check for new version of mxcheck")
@@ -285,6 +289,23 @@ func main() {
 			}
 			for k, v := range runresult.bldnsipnotlisted {
 				InfoLogger.Println(Green("+ " + k + " does not list " + v))
+			}
+		}
+
+		if *smtpsmuggle {
+			InfoLogger.Println("== Checking for SMTP Smuggle Vulnerability ==")
+			smuggleresult := TestSMTPSmuggling(targetHost+":25", *mailFrom, *mailTo, false)
+			if smuggleresult.Accepted {
+				singlemx.smugglevuln = smuggleresult.Accepted
+				InfoLogger.Println(Red(targetHost + " seems to be vulnerable to SMTP Smuggling"))
+			} else {
+				InfoLogger.Println(Green(targetHost + " seems not to be vulnerable to SMTP Smuggling"))
+			}
+			//cleanResp := strings.NewReplacer("\n", "", "\r", "").Replace(smuggleresult.Response)
+			singlemx.smuggleresp = strings.NewReplacer("\n", "", "\r", "").Replace(smuggleresult.Response)
+			InfoLogger.Println("Response: ", singlemx.smuggleresp)
+			if smuggleresult.Error != nil {
+				singlemx.smuggleerror = smuggleresult.Error.Error()
 			}
 		}
 
