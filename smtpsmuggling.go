@@ -9,12 +9,14 @@ import (
 	"time"
 )
 
+// SmugglingResult holds the result of a SMTPSmuggling vulnerability check
 type SmugglingResult struct {
 	Accepted bool
 	Response string
 	Error    error
 }
 
+// TestSMTPSmuggling tests one e-mail server if it is vulnerable to SMTPSmuggling https://smtpsmuggling.com
 func TestSMTPSmuggling(addr string, mailFrom string, rcptTo string, useTLS bool) SmugglingResult {
 	var res SmugglingResult
 
