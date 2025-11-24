@@ -9,6 +9,7 @@ It checks
   * open ports: 25, 465, 587
   * if the service is listed by blacklists
   * if it leaks information by server string and VRFY command
+  * if the e-mail server is vulnerable to SMTPSmuggling
   * and if the server is an open relay
 
 You can set mailFrom, mailTo, the DNS server, DKIM selector and output a report in tsv format.
@@ -16,6 +17,7 @@ You can set mailFrom, mailTo, the DNS server, DKIM selector and output a report 
 
     -b, --blacklist          Check if the service is on blacklists
     -d, --dnsserver string   The dns server to be requested (default "8.8.8.8")
+    -g, --smuggle            Scan for SMTPSmuggling vulnerability
     -p, --disable-port-scan  Disable SMTP port scan
     -f, --mailfrom string    Set the mailFrom address (default "info@foo.wtf")
     -t, --mailto string      Set the mailTo address (default "info@baz.wtf")
@@ -30,7 +32,7 @@ You can set mailFrom, mailTo, the DNS server, DKIM selector and output a report 
 
 # Version
 
-v1.7.0
+v1.8.0
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/steffenfritz/mxcheck)](https://goreportcard.com/report/github.com/steffenfritz/mxcheck) 
 [![Go Reference](https://pkg.go.dev/badge/github.com/steffenfritz/mxcheck.svg)](https://pkg.go.dev/github.com/steffenfritz/mxcheck)
@@ -40,13 +42,19 @@ v1.7.0
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/steffenfritz/mxcheck/badge)](https://scorecard.dev/viewer/?uri=github.com/steffenfritz/mxcheck)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/9171/badge)](https://www.bestpractices.dev/projects/9171)
 
+[![Kali](https://img.shields.io/badge/Kali-268BEE?style=for-the-badge&logo=kalilinux&logoColor=white)](https://www.kali.org/tools/mxcheck/)
+
 # Installation
 
-    go install github.com/steffenfritz/mxcheck@v1.7.0
+    go install github.com/steffenfritz/mxcheck@v1.8.0
     
 or
 
     download a pre-compiled binary.
+
+or
+
+    use Kali Linux repositories
 
 # Usage Example
 
@@ -54,7 +62,7 @@ or
     ./mxcheck -s 2600.com -v
     ./mxcheck -s 2600.com -d 8.8.8.8
     ./mxcheck -s 2600.com -n -f info@baz.com -t boss@foo.org -w -S default
-    ./mxcheck -s 2600.com -n -f info@baz.com -t boss@foo.org -w -S default -b
+    ./mxcheck -s 2600.com -n -f info@baz.com -t boss@foo.org -w -S default -b -g
     
    [![asciicast](https://asciinema.org/a/471229.svg)](https://asciinema.org/a/471229)
     

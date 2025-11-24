@@ -80,9 +80,9 @@ func main() {
 	dnsServer := flag.StringP("dnsserver", "d", "8.8.8.8", "The dns server to be requested")
 	disablePortScan := flag.BoolP("disable-port-scan", "p", false, "Disable SMTP port scan")
 	mailFrom := flag.StringP("mailfrom", "f", "info@foo.wtf", "Set the mailFrom address")
+	smtpsmuggle := flag.BoolP("smuggle", "g", false, "Test for SMTPSmuggling vulnerability")
 	mailTo := flag.StringP("mailto", "t", "info@baz.wtf", "Set the mailTo address")
 	noprompt := flag.BoolP("no-prompt", "n", false, "Answer yes to all questions")
-	smtpsmuggle := flag.BoolP("smuggle", "G", false, "Test for SMTPSmuggling vulnerability")
 	targetHostName := flag.StringP("service", "s", "",
 		"The service host to check")
 	updatecheck := flag.BoolP("updatecheck", "u", false, "Check for new version of mxcheck")
