@@ -1,7 +1,7 @@
 package main
 
 // Version is used by the Makefile to set the version
-var Version string = "v1.6.1"
+var Version string = "v1.8.0"
 
 // Build is used by the Makefile to set the build, i.e. short git fingerprint
 // var Build string
