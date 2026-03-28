@@ -30,6 +30,9 @@ type runresult struct {
 	bldnsipnotlisted   map[string]string
 	dmarcset           bool
 	dmarcfull          string
+	dmarcresult        dmarc
+	tlsrptresult       tlsrpt
+	bimiresult         bimi
 }
 
 // mxresult is used to store a mx scan result for further processing
@@ -50,6 +53,10 @@ type mxresult struct {
 	starttlsversion string
 	tlscertvalid    bool
 	tlsversion      string
+	tlscertexpiry   time.Time
+	tlscertsubjectcn string
+	tlscertissuercn  string
+	tlscertsans      []string
 	smtps           bool
 	openrelay       bool
 	vrfysupport     bool
@@ -181,13 +188,65 @@ func main() {
 	}
 	if dmarcentry.dmarcset {
 		runresult.dmarcset = true
-		// this copying makes little sense tbh right now. But if we parse the answer it will help.
 		runresult.dmarcfull = dmarcentry.dmarcfull
+		runresult.dmarcresult = dmarcentry
 		InfoLogger.Println(Green("DMARC set"))
-		InfoLogger.Println(runresult.dmarcfull)
+		InfoLogger.Println("DMARC Policy:          " + dmarcentry.p)
+		if len(dmarcentry.sp) > 0 {
+			InfoLogger.Println("DMARC Subdomain Policy: " + dmarcentry.sp)
+		}
+		if len(dmarcentry.adkim) > 0 {
+			InfoLogger.Println("DMARC DKIM Alignment:  " + dmarcentry.adkim)
+		}
+		if len(dmarcentry.aspf) > 0 {
+			InfoLogger.Println("DMARC SPF Alignment:   " + dmarcentry.aspf)
+		}
+		if len(dmarcentry.fo) > 0 {
+			InfoLogger.Println("DMARC Failure Options: " + dmarcentry.fo)
+		}
+		if len(dmarcentry.rua) > 0 {
+			InfoLogger.Println("DMARC RUA:             " + dmarcentry.rua)
+		}
+		if len(dmarcentry.ruf) > 0 {
+			InfoLogger.Println("DMARC RUF:             " + dmarcentry.ruf)
+		}
+		if len(dmarcentry.pct) > 0 {
+			InfoLogger.Println("DMARC Pct:             " + dmarcentry.pct)
+		}
 	} else {
 		// This is just yellow because DMARC has its friends and foes...
 		InfoLogger.Println(Yellow("No DMARC set"))
+	}
+
+	// TLSRPT lookup
+	InfoLogger.Println("== Checking TLSRPT record ==")
+	tlsrptentry, err := getTLSRPT(*targetHostName, *dnsServer)
+	if err != nil {
+		ErrorLogger.Println(err.Error())
+	}
+	runresult.tlsrptresult = tlsrptentry
+	if tlsrptentry.tlsrptset {
+		InfoLogger.Println(Green("TLSRPT set"))
+		InfoLogger.Println("TLSRPT RUA: " + tlsrptentry.rua)
+	} else {
+		InfoLogger.Println(Yellow("No TLSRPT set"))
+	}
+
+	// BIMI lookup
+	InfoLogger.Println("== Checking BIMI record ==")
+	bimientry, err := getBIMI(*targetHostName, *dnsServer)
+	if err != nil {
+		ErrorLogger.Println(err.Error())
+	}
+	runresult.bimiresult = bimientry
+	if bimientry.bimiset {
+		InfoLogger.Println(Green("BIMI set"))
+		InfoLogger.Println("BIMI Logo URI:      " + bimientry.l)
+		if len(bimientry.a) > 0 {
+			InfoLogger.Println("BIMI Authority URI: " + bimientry.a)
+		}
+	} else {
+		InfoLogger.Println(Yellow("No BIMI set"))
 	}
 
 	// Check blacklists for domain name
@@ -400,11 +459,18 @@ func main() {
 				// TLS test
 				if port == "465" {
 					InfoLogger.Println("== Checking for TLS support on port " + port + " ==")
-					orresult.tlsversion, orresult.tlsbool, orresult.tlsvalid, err = tlsCheck(targetHost, port)
+					certinfo, err := tlsCheck(targetHost, port)
 					if err != nil {
 						InfoLogger.Println(err)
 					}
-					singlemx.tlsversion = orresult.tlsversion
+					orresult.tlsbool = certinfo.tlsok
+					orresult.tlsvalid = certinfo.certvalid
+					orresult.tlsversion = certinfo.version
+					singlemx.tlsversion = certinfo.version
+					singlemx.tlscertexpiry = certinfo.expiry
+					singlemx.tlscertsubjectcn = certinfo.subjectCN
+					singlemx.tlscertissuercn = certinfo.issuerCN
+					singlemx.tlscertsans = certinfo.sans
 					if orresult.tlsbool {
 						InfoLogger.Println(Green("SMTPS supported"))
 						if orresult.tlsvalid {
@@ -418,6 +484,12 @@ func main() {
 							InfoLogger.Println(Yellow("SMTPS TLS Version: " + orresult.tlsversion))
 						} else {
 							InfoLogger.Println("SMTPS TLS Version: " + orresult.tlsversion)
+						}
+						if !certinfo.expiry.IsZero() {
+							InfoLogger.Println("SMTPS Cert Expiry:     " + certinfo.expiry.Format(time.RFC3339))
+							InfoLogger.Println("SMTPS Cert Subject CN: " + certinfo.subjectCN)
+							InfoLogger.Println("SMTPS Cert Issuer CN:  " + certinfo.issuerCN)
+							InfoLogger.Println("SMTPS Cert SANs:       " + strings.Join(certinfo.sans, ", "))
 						}
 					} else {
 						InfoLogger.Println(Cyan("SMTPS not supported"))
