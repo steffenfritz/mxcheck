@@ -251,6 +251,37 @@ func getDMARC(targetHostName string, dnsServer string) (dmarc, error) {
 					if strings.Contains(v, "v=DMARC1") {
 						dmarc.dmarcset = true
 						dmarc.dmarcfull = in.Answer[n].String()
+						for _, part := range strings.Split(v, ";") {
+							part = strings.TrimSpace(part)
+							kv := strings.SplitN(part, "=", 2)
+							if len(kv) != 2 {
+								continue
+							}
+							switch strings.TrimSpace(kv[0]) {
+							case "v":
+								dmarc.v = strings.TrimSpace(kv[1])
+							case "p":
+								dmarc.p = strings.TrimSpace(kv[1])
+							case "sp":
+								dmarc.sp = strings.TrimSpace(kv[1])
+							case "adkim":
+								dmarc.adkim = strings.TrimSpace(kv[1])
+							case "aspf":
+								dmarc.aspf = strings.TrimSpace(kv[1])
+							case "fo":
+								dmarc.fo = strings.TrimSpace(kv[1])
+							case "rua":
+								dmarc.rua = strings.TrimSpace(kv[1])
+							case "ruf":
+								dmarc.ruf = strings.TrimSpace(kv[1])
+							case "rf":
+								dmarc.rf = strings.TrimSpace(kv[1])
+							case "ri":
+								dmarc.ri = strings.TrimSpace(kv[1])
+							case "pct":
+								dmarc.pct = strings.TrimSpace(kv[1])
+							}
+						}
 					}
 				}
 			}
@@ -258,4 +289,96 @@ func getDMARC(targetHostName string, dnsServer string) (dmarc, error) {
 	}
 
 	return dmarc, nil
+}
+
+// getTLSRPT builds a TXT request for _smtp._tls.<domain> (RFC 8460)
+// and sends it to a dns server.
+// It returns type tlsrpt and an error.
+func getTLSRPT(targetHostName string, dnsServer string) (tlsrpt, error) {
+	var result tlsrpt
+
+	m := new(dns.Msg)
+	m.SetQuestion(dns.Fqdn("_smtp._tls."+targetHostName), dns.TypeTXT)
+
+	c := new(dns.Client)
+	c.Net = "tcp"
+	in, _, err := c.Exchange(m, dnsServer+":53")
+	if err != nil {
+		return result, err
+	}
+
+	if len(in.Answer) != 0 {
+		for n := range in.Answer {
+			if t, ok := in.Answer[n].(*dns.TXT); ok {
+				for _, v := range t.Txt {
+					if strings.HasPrefix(v, "v=TLSRPTv1") {
+						result.tlsrptset = true
+						result.tlsrptfull = in.Answer[n].String()
+						for _, part := range strings.Split(v, ";") {
+							part = strings.TrimSpace(part)
+							kv := strings.SplitN(part, "=", 2)
+							if len(kv) != 2 {
+								continue
+							}
+							switch strings.TrimSpace(kv[0]) {
+							case "v":
+								result.v = strings.TrimSpace(kv[1])
+							case "rua":
+								result.rua = strings.TrimSpace(kv[1])
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return result, nil
+}
+
+// getBIMI builds a TXT request for default._bimi.<domain>
+// and sends it to a dns server.
+// It returns type bimi and an error.
+func getBIMI(targetHostName string, dnsServer string) (bimi, error) {
+	var result bimi
+
+	m := new(dns.Msg)
+	m.SetQuestion(dns.Fqdn("default._bimi."+targetHostName), dns.TypeTXT)
+
+	c := new(dns.Client)
+	c.Net = "tcp"
+	in, _, err := c.Exchange(m, dnsServer+":53")
+	if err != nil {
+		return result, err
+	}
+
+	if len(in.Answer) != 0 {
+		for n := range in.Answer {
+			if t, ok := in.Answer[n].(*dns.TXT); ok {
+				for _, v := range t.Txt {
+					if strings.HasPrefix(v, "v=BIMI1") {
+						result.bimiset = true
+						result.bimifull = in.Answer[n].String()
+						for _, part := range strings.Split(v, ";") {
+							part = strings.TrimSpace(part)
+							kv := strings.SplitN(part, "=", 2)
+							if len(kv) != 2 {
+								continue
+							}
+							switch strings.TrimSpace(kv[0]) {
+							case "v":
+								result.v = strings.TrimSpace(kv[1])
+							case "l":
+								result.l = strings.TrimSpace(kv[1])
+							case "a":
+								result.a = strings.TrimSpace(kv[1])
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return result, nil
 }

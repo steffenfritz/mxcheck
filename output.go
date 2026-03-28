@@ -6,6 +6,7 @@ import (
 	"os"
 	"slices"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -74,7 +75,65 @@ func writeTSV(targetHostName string, runresult runresult, blacklist bool) error 
 		return err
 	}
 	if runresult.dmarcset {
-		if err = tsv.Write([]string{"DMARC Entry", runresult.dmarcfull}); err != nil {
+		d := runresult.dmarcresult
+		if err = tsv.Write([]string{"DMARC Full Entry", d.dmarcfull}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"DMARC Version", d.v}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"DMARC Policy", d.p}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"DMARC Subdomain Policy", d.sp}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"DMARC DKIM Alignment", d.adkim}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"DMARC SPF Alignment", d.aspf}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"DMARC Failure Options", d.fo}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"DMARC RUA", d.rua}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"DMARC RUF", d.ruf}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"DMARC Pct", d.pct}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"DMARC RI", d.ri}); err != nil {
+			return err
+		}
+	}
+
+	if err = tsv.Write([]string{"TLSRPT Set", strconv.FormatBool(runresult.tlsrptresult.tlsrptset)}); err != nil {
+		return err
+	}
+	if runresult.tlsrptresult.tlsrptset {
+		if err = tsv.Write([]string{"TLSRPT RUA", runresult.tlsrptresult.rua}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"TLSRPT Full Entry", runresult.tlsrptresult.tlsrptfull}); err != nil {
+			return err
+		}
+	}
+
+	if err = tsv.Write([]string{"BIMI Set", strconv.FormatBool(runresult.bimiresult.bimiset)}); err != nil {
+		return err
+	}
+	if runresult.bimiresult.bimiset {
+		if err = tsv.Write([]string{"BIMI Logo URI", runresult.bimiresult.l}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"BIMI Authority URI", runresult.bimiresult.a}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"BIMI Full Entry", runresult.bimiresult.bimifull}); err != nil {
 			return err
 		}
 	}
@@ -127,8 +186,22 @@ func writeTSV(targetHostName string, runresult runresult, blacklist bool) error 
 			return err
 		}
 		if slices.Contains(mxentry.openports, "465") {
-			if err = tsv.Write([]string{"TLS Version PORT 465 ", mxentry.tlsversion}); err != nil {
+			if err = tsv.Write([]string{"TLS Version PORT 465", mxentry.tlsversion}); err != nil {
 				return err
+			}
+			if !mxentry.tlscertexpiry.IsZero() {
+				if err = tsv.Write([]string{"TLS Cert Expiry", mxentry.tlscertexpiry.Format(time.RFC3339)}); err != nil {
+					return err
+				}
+				if err = tsv.Write([]string{"TLS Cert Subject CN", mxentry.tlscertsubjectcn}); err != nil {
+					return err
+				}
+				if err = tsv.Write([]string{"TLS Cert Issuer CN", mxentry.tlscertissuercn}); err != nil {
+					return err
+				}
+				if err = tsv.Write([]string{"TLS Cert SANs", strings.Join(mxentry.tlscertsans, ",")}); err != nil {
+					return err
+				}
 			}
 		}
 		if err = tsv.Write([]string{"VRFY Supported", strconv.FormatBool(mxentry.vrfysupport)}); err != nil {
