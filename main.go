@@ -422,11 +422,10 @@ func main() {
 					} else {
 						InfoLogger.Println(Cyan("SMTPS not supported"))
 					}
-
-					runresult.mxresults = append(runresult.mxresults, singlemx)
-					println()
 				}
 			}
+			runresult.mxresults = append(runresult.mxresults, singlemx)
+			println()
 		}
 	}
 

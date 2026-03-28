@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 )
 
 // mtastsuri is the fixed uri suffix defined in rfc8461
@@ -23,20 +24,27 @@ type mtaststxt struct {
 //mtasts checks if mtasts is wanted and possible
 func mtasts(targetHostname string) (mtaststxt, error) {
 	var mtaststxt mtaststxt
-	resp, err := http.Get(mtastsprefix + targetHostname + mtastsuri)
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Get(mtastsprefix + targetHostname + mtastsuri)
 	if err != nil {
 		return mtaststxt, err
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return mtaststxt, err
+	}
 
 	mtastssplit := strings.Split(string(body), "\n")
+	if len(mtastssplit) < 3 {
+		return mtaststxt, nil
+	}
 	mtaststxt.version = mtastssplit[0]
 	mtaststxt.mode = mtastssplit[1]
 	mtaststxt.maxAge = mtastssplit[2]
-	for _, mxentry := range mtastssplit[2:] {
+	for _, mxentry := range mtastssplit[3:] {
 		mtaststxt.mx = append(mtaststxt.mx, mxentry)
 	}
 
-	return mtaststxt, err
+	return mtaststxt, nil
 }

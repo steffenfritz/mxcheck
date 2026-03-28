@@ -10,18 +10,17 @@ type MXCVersion struct {
 }
 
 func getLatestVersion() error {
-	var err error
 	url := "https://api.github.com/repos/steffenfritz/mxcheck/releases/latest"
 	resp, err := http.Get(url)
 	if err != nil {
-		InfoLogger.Fatalln(err)
+		return err
 	}
+	defer resp.Body.Close()
 
 	var mxcv MXCVersion
 	jsondec := json.NewDecoder(resp.Body)
-	err = jsondec.Decode(&mxcv)
-	if err != nil {
-		InfoLogger.Fatalln(err)
+	if err = jsondec.Decode(&mxcv); err != nil {
+		return err
 	}
 
 	if mxcv.Tag_name == Version {
@@ -32,5 +31,5 @@ func getLatestVersion() error {
 		InfoLogger.Println("Available version: " + mxcv.Tag_name)
 	}
 
-	return err
+	return nil
 }

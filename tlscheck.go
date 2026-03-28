@@ -31,7 +31,7 @@ func tlsCheck(targetHost string, port string) (string, bool, bool, error) {
 	tlsConn := tls.Client(conn, tlsconfig)
 	if err := tlsConn.Handshake(); err != nil {
 		InfoLogger.Println(Red("TLS handshake failed"))
-		if err == nil || strings.HasSuffix(err.Error(), "certificate name does not match input") {
+		if strings.HasSuffix(err.Error(), "certificate name does not match input") {
 			// Update TLS configuration
 			tlsbool = true
 			tlsconfig = &tls.Config{InsecureSkipVerify: true}

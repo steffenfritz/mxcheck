@@ -12,7 +12,6 @@ var dnsbllistip = []string{"ix.dnsbl.manitu.net.",
 	"truncate.gbudb.net.",
 	"dnsbl.dronebl.org.",
 	"rblspamassassin.interserver.net.",
-	"ix.dnsbl.manitu.net.",
 	"bl.spamcop.net.",
 	"dnsbl-2.uceprotect.net.",
 	"spam.dnsbl.sorbs.net.",
@@ -63,7 +62,8 @@ func checkdnsblName(domainname string, dnsServer string) (map[string]string, map
 
 		in, _, err := c.Exchange(m, dnsServer+":53")
 		if err != nil {
-			println(err.Error())
+			ErrorLogger.Println(err)
+			continue
 		}
 
 		if len(in.Answer) == 0 {
