@@ -22,7 +22,7 @@
 .\" %%%LICENSE_END
 
 
-.TH mxcheck 1 "November 2025" "version 1.8.0"
+.TH mxcheck 1 "March 2026" "version 1.9.0"
 
 
 .SH NAME
@@ -30,8 +30,9 @@ mxcheck
 .SH SYNOPSIS
 .B mxcheck [OPTION]
 .SH DESCRIPTION
-mxcheck is an info scanner for e-mail servers. It checks the following DNS records: A, MX, PTR, SPF, MTA-STS, DKIM and DMARC.
+mxcheck is an info scanner for e-mail servers. It checks the following DNS records: A, MX, PTR, SPF, MTA-STS, DKIM, DMARC (all fields parsed), TLSRPT (RFC 8460), and BIMI.
 It also checks for StartTLS support and the validity of the certificate, TLS versions, and if the VRFY command is supported.
+On port 465 (SMTPS), mxcheck retrieves full TLS certificate details including expiry date, Subject CN, Issuer CN, and Subject Alternative Names.
 After scanning the tcp ports 25, 465 and 587 mxcheck checks if the e-mail server is an open relay by trying to send a single message.
 It also checks whether the service is blacklisted by querying public blacklist services.
 
