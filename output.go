@@ -22,77 +22,159 @@ func writeTSV(targetHostName string, runresult runresult, blacklist bool) error 
 	if err != nil {
 		return err
 	}
+	defer fd.Close()
 	tsv := NewTSVWriter(fd)
-	err = tsv.Write([]string{"Test Date", runresult.testdate})
-	err = tsv.Write([]string{"Target Domain Name", runresult.targetdomainname})
-	err = tsv.Write([]string{"DNS Server", runresult.dnsserver})
-	err = tsv.Write([]string{"MailFrom", runresult.mailfrom})
-	err = tsv.Write([]string{"MailTo", runresult.mailto})
+	if err = tsv.Write([]string{"Test Date", runresult.testdate}); err != nil {
+		return err
+	}
+	if err = tsv.Write([]string{"Target Domain Name", runresult.targetdomainname}); err != nil {
+		return err
+	}
+	if err = tsv.Write([]string{"DNS Server", runresult.dnsserver}); err != nil {
+		return err
+	}
+	if err = tsv.Write([]string{"MailFrom", runresult.mailfrom}); err != nil {
+		return err
+	}
+	if err = tsv.Write([]string{"MailTo", runresult.mailto}); err != nil {
+		return err
+	}
 	if !runresult.dkimresult.dkimset {
-		err = tsv.Write([]string{"DKIM Set", "false or not checked"})
+		if err = tsv.Write([]string{"DKIM Set", "false or not checked"}); err != nil {
+			return err
+		}
 	} else {
-		err = tsv.Write([]string{"DKIM Set", "true"})
-		err = tsv.Write([]string{"DKIM DNS Entry", runresult.dkimresult.domain})
-		err = tsv.Write([]string{"DKIM DNS Version", runresult.dkimresult.version})
-		err = tsv.Write([]string{"DKIM Key Type", runresult.dkimresult.keyType})
-		err = tsv.Write([]string{"DKIM Accepted Algorithm", runresult.dkimresult.accepAlgo})
-		err = tsv.Write([]string{"DKIM Granularity", runresult.dkimresult.granularity})
-		err = tsv.Write([]string{"DKIM Note", runresult.dkimresult.noteField})
-		err = tsv.Write([]string{"DKIM Public Key", runresult.dkimresult.publicKey})
+		if err = tsv.Write([]string{"DKIM Set", "true"}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"DKIM DNS Entry", runresult.dkimresult.domain}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"DKIM DNS Version", runresult.dkimresult.version}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"DKIM Key Type", runresult.dkimresult.keyType}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"DKIM Accepted Algorithm", runresult.dkimresult.accepAlgo}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"DKIM Granularity", runresult.dkimresult.granularity}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"DKIM Note", runresult.dkimresult.noteField}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"DKIM Public Key", runresult.dkimresult.publicKey}); err != nil {
+			return err
+		}
 	}
 
-	err = tsv.Write([]string{"DMARC Set", strconv.FormatBool(runresult.dmarcset)})
+	if err = tsv.Write([]string{"DMARC Set", strconv.FormatBool(runresult.dmarcset)}); err != nil {
+		return err
+	}
 	if runresult.dmarcset {
-		err = tsv.Write([]string{"DMARC Entry", runresult.dmarcfull})
-
+		if err = tsv.Write([]string{"DMARC Entry", runresult.dmarcfull}); err != nil {
+			return err
+		}
 	}
 
 	for i, mxentry := range runresult.mxresults {
-		err = tsv.Write([]string{"MX Entry Seq Number ", strconv.Itoa(i)})
-		err = tsv.Write([]string{"MX Entry DNS", mxentry.mxentry})
-		err = tsv.Write([]string{"IP Address", mxentry.ipaddr})
-		err = tsv.Write([]string{"AS Number", strconv.Itoa(mxentry.asnum)})
-		err = tsv.Write([]string{"AS Country", mxentry.ascountry})
-		err = tsv.Write([]string{"Server string", mxentry.serverstring})
+		if err = tsv.Write([]string{"MX Entry Seq Number ", strconv.Itoa(i)}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"MX Entry DNS", mxentry.mxentry}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"IP Address", mxentry.ipaddr}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"AS Number", strconv.Itoa(mxentry.asnum)}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"AS Country", mxentry.ascountry}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"Server string", mxentry.serverstring}); err != nil {
+			return err
+		}
 		portlist := ""
 		for _, port := range mxentry.openports {
 			portlist += port + " "
 		}
-		err = tsv.Write([]string{"Open Ports", portlist})
-		err = tsv.Write([]string{"PTR Entry", mxentry.ptrentry})
-		err = tsv.Write([]string{"PTR Match", strconv.FormatBool(mxentry.ptrmatch)})
-		err = tsv.Write([]string{"SPF Set", strconv.FormatBool(mxentry.spfset)})
-		err = tsv.Write([]string{"MTA-STS Set", strconv.FormatBool(mxentry.stsset)})
-		err = tsv.Write([]string{"STARTTLS PORT 25 Supported", strconv.FormatBool(mxentry.starttls)})
-		err = tsv.Write([]string{"STARTTLS TLS Version", mxentry.starttlsversion})
-		err = tsv.Write([]string{"Certificate Valid", strconv.FormatBool(mxentry.tlscertvalid)})
-		if slices.Contains(mxentry.openports, "465") {
-			err = tsv.Write([]string{"TLS Version PORT 465 ", mxentry.tlsversion})
+		if err = tsv.Write([]string{"Open Ports", portlist}); err != nil {
+			return err
 		}
-		err = tsv.Write([]string{"VRFY Supported", strconv.FormatBool(mxentry.vrfysupport)})
-		err = tsv.Write([]string{"SMTP Smuggling Vulnerability", strconv.FormatBool(mxentry.smugglevuln)})
-		err = tsv.Write([]string{"SMTP Smuggling Response", mxentry.smuggleresp})
-		err = tsv.Write([]string{"Fake Sender Accepted", strconv.FormatBool(mxentry.fakesender)})
-		err = tsv.Write([]string{"Fake Recipient Accepted", strconv.FormatBool(mxentry.fakercpt)})
-		err = tsv.Write([]string{"Open Relay", strconv.FormatBool(mxentry.openrelay)})
+		if err = tsv.Write([]string{"PTR Entry", mxentry.ptrentry}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"PTR Match", strconv.FormatBool(mxentry.ptrmatch)}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"SPF Set", strconv.FormatBool(mxentry.spfset)}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"MTA-STS Set", strconv.FormatBool(mxentry.stsset)}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"STARTTLS PORT 25 Supported", strconv.FormatBool(mxentry.starttls)}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"STARTTLS TLS Version", mxentry.starttlsversion}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"Certificate Valid", strconv.FormatBool(mxentry.tlscertvalid)}); err != nil {
+			return err
+		}
+		if slices.Contains(mxentry.openports, "465") {
+			if err = tsv.Write([]string{"TLS Version PORT 465 ", mxentry.tlsversion}); err != nil {
+				return err
+			}
+		}
+		if err = tsv.Write([]string{"VRFY Supported", strconv.FormatBool(mxentry.vrfysupport)}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"SMTP Smuggling Vulnerability", strconv.FormatBool(mxentry.smugglevuln)}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"SMTP Smuggling Response", mxentry.smuggleresp}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"Fake Sender Accepted", strconv.FormatBool(mxentry.fakesender)}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"Fake Recipient Accepted", strconv.FormatBool(mxentry.fakercpt)}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"Open Relay", strconv.FormatBool(mxentry.openrelay)}); err != nil {
+			return err
+		}
 	}
 
 	if blacklist {
 		for bldns, blacklistresult := range runresult.bldnsnamelisted {
-			err = tsv.Write([]string{"Blacklist " + bldns + " lists ", blacklistresult})
+			if err = tsv.Write([]string{"Blacklist " + bldns + " lists ", blacklistresult}); err != nil {
+				return err
+			}
 		}
 		for bldns, blacklistresult := range runresult.bldnsnamenotlisted {
-			err = tsv.Write([]string{"Blacklist " + bldns + " does not list ", blacklistresult})
+			if err = tsv.Write([]string{"Blacklist " + bldns + " does not list ", blacklistresult}); err != nil {
+				return err
+			}
 		}
 		for bldns, blacklistresult := range runresult.bldnsiplisted {
-			err = tsv.Write([]string{"Blacklist " + bldns + " lists ", blacklistresult})
+			if err = tsv.Write([]string{"Blacklist " + bldns + " lists ", blacklistresult}); err != nil {
+				return err
+			}
 		}
 		for bldns, blacklistresult := range runresult.bldnsipnotlisted {
-			err = tsv.Write([]string{"Blacklist " + bldns + " does not list ", blacklistresult})
+			if err = tsv.Write([]string{"Blacklist " + bldns + " does not list ", blacklistresult}); err != nil {
+				return err
+			}
 		}
 	}
 
 	tsv.Flush()
 
-	return err
+	return tsv.Error()
 }

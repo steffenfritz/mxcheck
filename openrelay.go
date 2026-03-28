@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"crypto/tls"
 	"fmt"
-	"log"
 	"net"
 	"net/smtp"
 	"strings"
@@ -42,17 +41,17 @@ func openRelay(mailFrom string, mailTo string, targetHost string, targetPort str
 
 	// Print server string. You can trust the server string, but you shouldn't...
 	conn, err := net.DialTimeout("tcp", targetHost+":"+targetPort, 15*time.Second)
-	defer conn.Close()
-
 	if err != nil {
 		or.serverstring = "Could not read banner: " + err.Error()
 	} else {
+		defer conn.Close()
 		buf := bufio.NewReader(conn)
 		bannerbytes, err := buf.ReadBytes('\n')
 		if err != nil {
-			log.Fatalf("ee Fatal error: %s", err.Error())
+			ErrorLogger.Println("Error reading banner: " + err.Error())
+		} else {
+			or.serverstring = string(bannerbytes)
 		}
-		or.serverstring = string(bannerbytes)
 	}
 
 	// set default TLS config

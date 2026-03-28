@@ -62,7 +62,7 @@ func getA(targetHostName string, dnsServer string) (string, error) {
 		a = t.A.String()
 		// We check for a second ip address when the first entry is also an mx entry.
 		// We also have to update the targetHost because of the cwrt test in openrelay
-	} else {
+	} else if len(in.Answer) > 1 {
 		if t, ok := in.Answer[1].(*dns.A); ok {
 			a = t.A.String()
 		}
@@ -194,27 +194,27 @@ func getDKIM(selector string, targetHostName string, dnsServer string) (dkim, er
 						dkim.version = "1"
 						for _, partDKIM := range dkimSplit {
 							if strings.HasPrefix(partDKIM, "g=") {
-								dkim.granularity = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
+								dkim.granularity = strings.TrimRight(strings.SplitN(partDKIM, "=", 2)[1], ";")
 								continue
 							}
 							if strings.HasPrefix(partDKIM, "h=") {
-								dkim.accepAlgo = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
+								dkim.accepAlgo = strings.TrimRight(strings.SplitN(partDKIM, "=", 2)[1], ";")
 								continue
 							}
 							if strings.HasPrefix(partDKIM, "k=") {
-								dkim.keyType = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
+								dkim.keyType = strings.TrimRight(strings.SplitN(partDKIM, "=", 2)[1], ";")
 								continue
 							}
 							if strings.HasPrefix(partDKIM, "n=") {
-								dkim.noteField = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
+								dkim.noteField = strings.TrimRight(strings.SplitN(partDKIM, "=", 2)[1], ";")
 								continue
 							}
 							if strings.HasPrefix(partDKIM, "p=") {
-								dkim.publicKey = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
+								dkim.publicKey = strings.TrimRight(strings.SplitN(partDKIM, "=", 2)[1], ";")
 								continue
 							}
 							if strings.HasPrefix(partDKIM, "t=") {
-								dkim.testing = strings.TrimRight(strings.Split(partDKIM, "=")[1], ";")
+								dkim.testing = strings.TrimRight(strings.SplitN(partDKIM, "=", 2)[1], ";")
 								continue
 							}
 						}
