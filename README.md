@@ -2,10 +2,11 @@
 
 mxcheck is an info scanner for e-mail servers.
 
-It checks 
-  * DNS records: A, MX, PTR, SPF, MTA-STS, DKIM, DMARC
+It checks
+  * DNS records: A, MX, PTR, SPF, MTA-STS, DKIM, DMARC (fully parsed), TLSRPT, BIMI
   * AS Number and AS Country
   * the support of StartTLS and the certificate
+  * TLS certificate details on port 465: expiry date, Subject CN, Issuer CN, SANs
   * open ports: 25, 465, 587
   * if the service is listed by blacklists
   * if it leaks information by server string and VRFY command
