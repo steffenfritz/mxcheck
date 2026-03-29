@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	. "github.com/logrusorgru/aurora"
 	"net"
 )
 
@@ -42,7 +41,7 @@ func tlsCheck(targetHost string, port string) (tlscertinfo, error) {
 	tlsconfig := &tls.Config{ServerName: targetHost}
 	tlsConn := tls.Client(conn, tlsconfig)
 	if err := tlsConn.Handshake(); err != nil {
-		InfoLogger.Println(Red("TLS handshake failed"))
+		printFail("TLS handshake failed")
 		if strings.HasSuffix(err.Error(), "certificate name does not match input") {
 			// Update TLS configuration
 			info.tlsok = true
