@@ -35,7 +35,7 @@ func checkdnsblIP(ipaddr string, dnsServer string) (map[string]string, map[strin
 		resp, err := getA(requestip, dnsServer)
 
 		if err != nil && err.Error() != "no answer from DNS" {
-			ErrorLogger.Println(err)
+			printError(err.Error())
 		}
 
 		if len(resp) != 0 {
@@ -62,7 +62,7 @@ func checkdnsblName(domainname string, dnsServer string) (map[string]string, map
 
 		in, _, err := c.Exchange(m, dnsServer+":53")
 		if err != nil {
-			ErrorLogger.Println(err)
+			printError(err.Error())
 			continue
 		}
 

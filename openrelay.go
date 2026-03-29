@@ -48,7 +48,7 @@ func openRelay(mailFrom string, mailTo string, targetHost string, targetPort str
 		buf := bufio.NewReader(conn)
 		bannerbytes, err := buf.ReadBytes('\n')
 		if err != nil {
-			ErrorLogger.Println("Error reading banner: " + err.Error())
+			printError("Error reading banner: " + err.Error())
 		} else {
 			or.serverstring = string(bannerbytes)
 		}

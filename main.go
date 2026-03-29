@@ -4,13 +4,11 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	. "github.com/logrusorgru/aurora"
 	flag "github.com/spf13/pflag"
 )
 
@@ -37,50 +35,35 @@ type runresult struct {
 
 // mxresult is used to store a mx scan result for further processing
 type mxresult struct {
-	mxentry         string
-	ipaddr          string
-	asnum           int
-	ascountry       string
-	ptrentry        string
-	ptrmatch        bool
-	serverstring    string
-	spfset          bool
-	stsset          bool
-	openports       []string
-	fakesender      bool
-	fakercpt        bool
-	starttls        bool
-	starttlsversion string
-	tlscertvalid    bool
-	tlsversion      string
-	tlscertexpiry   time.Time
+	mxentry          string
+	ipaddr           string
+	asnum            int
+	ascountry        string
+	ptrentry         string
+	ptrmatch         bool
+	serverstring     string
+	spfset           bool
+	stsset           bool
+	openports        []string
+	fakesender       bool
+	fakercpt         bool
+	starttls         bool
+	starttlsversion  string
+	tlscertvalid     bool
+	tlsversion       string
+	tlscertexpiry    time.Time
 	tlscertsubjectcn string
 	tlscertissuercn  string
 	tlscertsans      []string
-	smtps           bool
-	openrelay       bool
-	vrfysupport     bool
-	smugglevuln     bool
-	smuggleresp     string
-	smuggleerror    string
-}
-
-var (
-	WarningLogger *log.Logger
-	InfoLogger    *log.Logger
-	ErrorLogger   *log.Logger
-)
-
-func init() {
-	InfoLogger = log.New(os.Stdout, "INFO:  ", log.Ldate|log.Ltime)
-	WarningLogger = log.New(os.Stdout, "WARN:  ", log.Ldate|log.Ltime)
-	ErrorLogger = log.New(os.Stdout, "ERROR: ", log.Ldate|log.Ltime)
+	smtps            bool
+	openrelay        bool
+	vrfysupport      bool
+	smugglevuln      bool
+	smuggleresp      string
+	smuggleerror     string
 }
 
 func main() {
-
-	println()
-
 	blacklist := flag.BoolP("blacklist", "b", false, "Check if the service is on blacklists")
 	dkimSelector := flag.StringP("dkim-selector", "S", "",
 		"The DKIM selector. If set a DKIM check is performed on the provided service domain")
@@ -93,10 +76,13 @@ func main() {
 	targetHostName := flag.StringP("service", "s", "",
 		"The service host to check")
 	updatecheck := flag.BoolP("updatecheck", "u", false, "Check for new version of mxcheck")
+	verboseFlag := flag.BoolP("verbose", "V", false, "Show timestamps in output")
 	version := flag.BoolP("version", "v", false, "Version and license")
 	writetsv := flag.BoolP("write-tsv", "w", false, "Write tsv formated report to file")
 
 	flag.Parse()
+
+	verbose = *verboseFlag
 
 	if *version {
 		fmt.Println(versionmsg)
@@ -106,13 +92,13 @@ func main() {
 	if *updatecheck {
 		err := getLatestVersion()
 		if err != nil {
-			ErrorLogger.Println("Error getting latest version:", err)
+			printError("Error getting latest version: " + err.Error())
 		}
 		return
 	}
 
 	if len(*targetHostName) == 0 {
-		ErrorLogger.Println("The service flag is mandatory.")
+		printError("The service flag is mandatory.")
 		return
 	}
 
@@ -121,136 +107,133 @@ func main() {
 	runresult.dnsserver = *dnsServer
 	runresult.mailfrom = *mailFrom
 	runresult.mailto = *mailTo
-
 	runresult.targetdomainname = *targetHostName
-	InfoLogger.Println("== Checking: " + *targetHostName + " ==")
+
+	printHeader(*targetHostName, runresult.testdate)
 
 	targetHosts, mxstatus, err := getMX(targetHostName, *dnsServer)
 	if err != nil {
-		ErrorLogger.Fatalln(err)
+		printErrorFatal(err.Error())
 	}
 
+	printSection("MX Records")
 	if mxstatus {
-		InfoLogger.Println("Found MX: ")
 		for _, mxentry := range targetHosts {
-			InfoLogger.Println("         " + mxentry)
+			printInfoRaw(mxentry)
 		}
 	} else {
-		WarningLogger.Println("No MX entry found. Using Target Host Name.")
+		printWarn("No MX entry found. Using Target Host Name.")
 	}
 
 	if !*noprompt {
 		reader := bufio.NewReader(os.Stdin)
-		// Fixing the newline "feature" in log
-		fmt.Printf("INFO:  %s Continue [y/n]: ", time.Now().Format("2006/01/02 15:04:05"))
+		fmt.Printf("\nContinue [y/n]: ")
 		response, err := reader.ReadString('\n')
 		if err != nil {
-			ErrorLogger.Fatal(err)
+			printErrorFatal(err.Error())
 		}
 		response = strings.ToLower(strings.TrimSpace(response))
 		if response != "y" {
-			InfoLogger.Println("ii User terminated. Bye.")
+			printInfoRaw("User terminated. Bye.")
 			return
 		}
 	}
 
 	if len(*dkimSelector) > 0 {
-		InfoLogger.Println("== Checking DKIM record ==")
+		printSection("DKIM")
 		runresult.dkimresult, err = getDKIM(*dkimSelector, *targetHostName, *dnsServer)
 		if err != nil {
-			ErrorLogger.Printf("%s", err.Error())
+			printError(err.Error())
 		} else {
 			if runresult.dkimresult.dkimset {
-				InfoLogger.Println("DKIM Domain " + runresult.dkimresult.domain)
-				InfoLogger.Println("DKIM Version " + runresult.dkimresult.version)
-				InfoLogger.Println("DKIM Key Type " + runresult.dkimresult.keyType)
+				printOK("DKIM set")
+				printInfo("Domain", runresult.dkimresult.domain)
+				printInfo("Version", runresult.dkimresult.version)
+				printInfo("Key Type", runresult.dkimresult.keyType)
 				if len(runresult.dkimresult.accepAlgo) > 0 {
-					InfoLogger.Println("DKIM Accepted Algorithms " + runresult.dkimresult.accepAlgo)
+					printInfo("Accepted Algorithms", runresult.dkimresult.accepAlgo)
 				} else {
-					InfoLogger.Println("DKIM Accepted Algorithms not set")
+					printWarn("Accepted Algorithms not set")
 				}
 				if len(runresult.dkimresult.noteField) > 0 {
-					InfoLogger.Println("DKIM  Note " + runresult.dkimresult.noteField)
-				} else {
-					InfoLogger.Println("DKIM No note set")
+					printInfo("Note", runresult.dkimresult.noteField)
 				}
 			} else {
-				InfoLogger.Println("DKIM not set or wrong selector")
+				printWarn("DKIM not set or wrong selector")
 			}
 		}
 	}
 
 	// DMARC lookup
-	InfoLogger.Println("== Checking DMARC record ==")
+	printSection("DMARC")
 	dmarcentry, err := getDMARC(*targetHostName, *dnsServer)
 	if err != nil {
-		ErrorLogger.Fatalln(err.Error())
+		printErrorFatal(err.Error())
 	}
 	if dmarcentry.dmarcset {
 		runresult.dmarcset = true
 		runresult.dmarcfull = dmarcentry.dmarcfull
 		runresult.dmarcresult = dmarcentry
-		InfoLogger.Println(Green("DMARC set"))
-		InfoLogger.Println("DMARC Policy:          " + dmarcentry.p)
+		printOK("DMARC set")
+		printInfo("Policy", dmarcentry.p)
 		if len(dmarcentry.sp) > 0 {
-			InfoLogger.Println("DMARC Subdomain Policy: " + dmarcentry.sp)
+			printInfo("Subdomain Policy", dmarcentry.sp)
 		}
 		if len(dmarcentry.adkim) > 0 {
-			InfoLogger.Println("DMARC DKIM Alignment:  " + dmarcentry.adkim)
+			printInfo("DKIM Alignment", dmarcentry.adkim)
 		}
 		if len(dmarcentry.aspf) > 0 {
-			InfoLogger.Println("DMARC SPF Alignment:   " + dmarcentry.aspf)
+			printInfo("SPF Alignment", dmarcentry.aspf)
 		}
 		if len(dmarcentry.fo) > 0 {
-			InfoLogger.Println("DMARC Failure Options: " + dmarcentry.fo)
+			printInfo("Failure Options", dmarcentry.fo)
 		}
 		if len(dmarcentry.rua) > 0 {
-			InfoLogger.Println("DMARC RUA:             " + dmarcentry.rua)
+			printInfo("RUA", dmarcentry.rua)
 		}
 		if len(dmarcentry.ruf) > 0 {
-			InfoLogger.Println("DMARC RUF:             " + dmarcentry.ruf)
+			printInfo("RUF", dmarcentry.ruf)
 		}
 		if len(dmarcentry.pct) > 0 {
-			InfoLogger.Println("DMARC Pct:             " + dmarcentry.pct)
+			printInfo("Pct", dmarcentry.pct)
 		}
 	} else {
 		// This is just yellow because DMARC has its friends and foes...
-		InfoLogger.Println(Yellow("No DMARC set"))
+		printWarn("No DMARC set")
 	}
 
 	// TLSRPT lookup
-	InfoLogger.Println("== Checking TLSRPT record ==")
+	printSection("TLSRPT")
 	tlsrptentry, err := getTLSRPT(*targetHostName, *dnsServer)
 	if err != nil {
-		ErrorLogger.Println(err.Error())
+		printError(err.Error())
 	}
 	runresult.tlsrptresult = tlsrptentry
 	if tlsrptentry.tlsrptset {
-		InfoLogger.Println(Green("TLSRPT set"))
-		InfoLogger.Println("TLSRPT RUA: " + tlsrptentry.rua)
+		printOK("TLSRPT set")
+		printInfo("RUA", tlsrptentry.rua)
 	} else {
-		InfoLogger.Println(Yellow("No TLSRPT set"))
+		printWarn("No TLSRPT set")
 	}
 
 	// BIMI lookup
-	InfoLogger.Println("== Checking BIMI record ==")
+	printSection("BIMI")
 	bimientry, err := getBIMI(*targetHostName, *dnsServer)
 	if err != nil {
-		ErrorLogger.Println(err.Error())
+		printError(err.Error())
 	}
 	runresult.bimiresult = bimientry
 	if bimientry.bimiset {
-		InfoLogger.Println(Green("BIMI set"))
-		InfoLogger.Println("BIMI Logo URI:      " + bimientry.l)
+		printOK("BIMI set")
+		printInfo("Logo URI", bimientry.l)
 		if len(bimientry.a) > 0 {
-			InfoLogger.Println("BIMI Authority URI: " + bimientry.a)
+			printInfo("Authority URI", bimientry.a)
 		}
 	} else {
-		InfoLogger.Println(Yellow("No BIMI set"))
+		printWarn("No BIMI set")
 	}
 
 	// Check blacklists for domain name
-	// InfoLogger.Println("Checking if domain is blacklisted")
 	if *blacklist {
 		runresult.bldnsnamelisted, runresult.bldnsnamenotlisted = checkdnsblName(*targetHostName, *dnsServer)
 	}
@@ -260,13 +243,13 @@ func main() {
 		singlemx := mxresult{}
 		singlemx.mxentry = targetHost
 
-		InfoLogger.Println("== Checking for A record ==")
+		printSection("MX Host: " + targetHost)
 		ipaddr, err := getA(targetHost, *dnsServer)
 		if err != nil {
-			ErrorLogger.Fatalln(err.Error())
+			printErrorFatal(err.Error())
 		}
 		singlemx.ipaddr = ipaddr
-		InfoLogger.Println("IP address MX: " + ipaddr)
+		printInfo("IP Address", ipaddr)
 
 		if *blacklist {
 			runresult.bldnsiplisted, runresult.bldnsipnotlisted = checkdnsblIP(ipaddr, *dnsServer)
@@ -275,107 +258,100 @@ func main() {
 		// ASN lookup
 		asn, err := getASN(ipaddr)
 		if err != nil {
-			ErrorLogger.Println(err.Error())
+			printError(err.Error())
 		} else {
 			singlemx.asnum = int(asn.ASNum)
 			singlemx.ascountry = asn.Country
-			InfoLogger.Println("AS Number: " + strconv.Itoa(singlemx.asnum))
-			InfoLogger.Println("AS Country: " + singlemx.ascountry)
+			printInfo("AS Number", strconv.Itoa(singlemx.asnum))
+			printInfo("AS Country", singlemx.ascountry)
 		}
 
 		// PTR lookup
-		InfoLogger.Println("== Checking for PTR record ==")
 		ptrentry, err := getPTR(ipaddr, *dnsServer)
 		if err != nil {
-			ErrorLogger.Fatalln(err.Error())
+			printErrorFatal(err.Error())
 		}
-
 		singlemx.ptrentry = ptrentry
-		InfoLogger.Println("PTR entry: " + ptrentry)
-
+		printInfo("PTR Entry", ptrentry)
 		if ptrentry == targetHost {
 			singlemx.ptrmatch = true
-			InfoLogger.Println(Green("PTR matches MX record"))
+			printOK("PTR matches MX record")
 		} else {
-			InfoLogger.Println(Red("PTR does not match MX record"))
+			printFail("PTR does not match MX record")
 		}
 
 		// SPF lookup
-		InfoLogger.Println("== Checking for SPF record ==")
+		printSection("SPF")
 		spfentry, spfanswer, err := getSPF(*targetHostName, *dnsServer)
 		if err != nil {
-			ErrorLogger.Fatalln(err.Error())
+			printErrorFatal(err.Error())
 		}
 		if spfentry {
 			singlemx.spfset = true
-			InfoLogger.Println(Green("SPF set"))
-			InfoLogger.Println(spfanswer)
+			printOK("SPF set")
+			printInfoRaw(spfanswer)
 		} else {
-			InfoLogger.Println(Red("No SPF set"))
+			printFail("No SPF set")
 		}
 
 		// MTA-STS lookup
-		InfoLogger.Println("== Checking for MTA-STS ==")
+		printSection("MTA-STS")
 		mtastsset, err := getMTASTS(*targetHostName, *dnsServer)
 		if err != nil {
-			ErrorLogger.Fatalln(err.Error())
+			printErrorFatal(err.Error())
 		}
 		if mtastsset {
 			singlemx.stsset = true
-			InfoLogger.Println(Green("MTA-STS subdomain set"))
-			InfoLogger.Println("Checking MTA-STS settings")
+			printOK("MTA-STS subdomain set")
 			mtaststxt, err := mtasts(*targetHostName)
 			if err != nil {
-				ErrorLogger.Printf("%s", err.Error())
+				printError(err.Error())
 			} else {
 				runresult.ststext = mtaststxt
 			}
-
 		} else {
-			InfoLogger.Println(Red("MTA-STS not set"))
+			printFail("MTA-STS not set")
 		}
 
 		if *blacklist {
-			InfoLogger.Println("== Result of DNS Blacklist checks ==")
+			printSection("DNSBL")
 			for k, v := range runresult.bldnsnamelisted {
-				InfoLogger.Println(Red("- " + k + " lists " + v))
+				printFail(k + " lists " + v)
 			}
 			for k, v := range runresult.bldnsiplisted {
-				InfoLogger.Println(Red("- " + k + " lists " + v))
+				printFail(k + " lists " + v)
 			}
 			for k, v := range runresult.bldnsnamenotlisted {
-				InfoLogger.Println(Green("+ " + k + " does not list " + v))
+				printOK(k + " does not list " + v)
 			}
 			for k, v := range runresult.bldnsipnotlisted {
-				InfoLogger.Println(Green("+ " + k + " does not list " + v))
+				printOK(k + " does not list " + v)
 			}
 		}
 
 		if *smtpsmuggle {
-			InfoLogger.Println("== Checking for SMTP Smuggle Vulnerability ==")
+			printSection("SMTP Smuggling")
 			smuggleresult := TestSMTPSmuggling(targetHost+":25", *mailFrom, *mailTo, false)
 			if smuggleresult.Accepted {
 				singlemx.smugglevuln = smuggleresult.Accepted
-				InfoLogger.Println(Red(targetHost + " seems to be vulnerable to SMTP Smuggling"))
+				printFail(targetHost + " seems to be vulnerable to SMTP Smuggling")
 			} else {
-				InfoLogger.Println(Green(targetHost + " seems not to be vulnerable to SMTP Smuggling"))
+				printOK(targetHost + " seems not to be vulnerable to SMTP Smuggling")
 			}
-			//cleanResp := strings.NewReplacer("\n", "", "\r", "").Replace(smuggleresult.Response)
 			singlemx.smuggleresp = strings.NewReplacer("\n", "", "\r", "").Replace(smuggleresult.Response)
-			InfoLogger.Println("Response: ", singlemx.smuggleresp)
+			printInfo("Response", singlemx.smuggleresp)
 			if smuggleresult.Error != nil {
 				singlemx.smuggleerror = smuggleresult.Error.Error()
 			}
 		}
 
 		if !*disablePortScan {
-			// Checking for open e-mail ports
-			InfoLogger.Println("== Checking for open e-mail ports ==")
+			printSection("Port Scan")
 			openPorts := portScan(targetHost)
-			InfoLogger.Print("Open ports: ", openPorts)
+			printInfo("Open ports", strings.Join(openPorts, ", "))
 
 			if len(openPorts) == 0 {
-				InfoLogger.Println(Cyan("No open ports to connect to. I cannot check this host."))
+				printWarn("No open ports to connect to. Cannot check this host.")
 				continue
 			}
 			singlemx.openports = openPorts
@@ -384,84 +360,83 @@ func main() {
 
 			for _, port := range openPorts {
 				if port == "25" {
-					InfoLogger.Println("== Checking for open relay on port " + port + " ==")
+					printSection("SMTP Port " + port)
 					orresult, err = openRelay(*mailFrom, *mailTo, targetHost, port)
 					if err != nil {
-						WarningLogger.Println(err.Error())
+						printWarn(err.Error())
 					}
 
 					// Server string
 					if len(orresult.serverstring) > 0 {
-						InfoLogger.Printf("Server Banner: %s", orresult.serverstring)
+						printInfo("Server Banner", orresult.serverstring)
 						singlemx.serverstring = strings.ReplaceAll(orresult.serverstring, "\r\n", "")
 					}
 
 					// Sender accepted
 					singlemx.fakesender = orresult.senderboolresult
 					if orresult.senderboolresult {
-						InfoLogger.Println("Fake sender accepted.")
+						printInfoRaw("Fake sender accepted")
 					} else {
-						InfoLogger.Println("Fake sender not accepted.")
+						printInfoRaw("Fake sender not accepted")
 					}
 
 					// Recipient accepted
 					singlemx.fakercpt = orresult.rcptboolresult
 					if orresult.rcptboolresult {
-						InfoLogger.Println("Recipient accepted.")
+						printInfoRaw("Recipient accepted")
 					} else {
-						InfoLogger.Println("Recipient not accepted. Skipped further open relay tests.")
+						printInfoRaw("Recipient not accepted. Skipped further open relay tests.")
 					}
 
 					// Open Relay test
 					if orresult.orboolresult {
 						singlemx.openrelay = true
-						InfoLogger.Println(Red("Server is probably an open relay"))
+						printFail("Server is probably an open relay")
 					} else {
-						InfoLogger.Println(Green("Server is not an open relay"))
+						printOK("Server is not an open relay")
 					}
 
 					// STARTTLS test
-					InfoLogger.Println("== Checking for STARTTLS on port 25 ==")
-
+					printSection("STARTTLS")
 					singlemx.starttls = orresult.starttlsbool
 					singlemx.starttlsversion = orresult.starttlsversion
 					if orresult.starttlsbool {
-						InfoLogger.Println(Green("STARTTLS supported"))
+						printOK("STARTTLS supported")
 						if orresult.starttlsversion == "TLS 1.3" || orresult.starttlsversion == "TLS 1.2" {
-							InfoLogger.Println(Green("STARTTLS - TLS Version: " + orresult.starttlsversion))
+							printOK("TLS Version: " + orresult.starttlsversion)
 						} else if orresult.starttlsversion == "TLS 1.1" {
-							InfoLogger.Println(Yellow("STARTTLS - TLS Version: " + orresult.starttlsversion))
+							printWarn("TLS Version: " + orresult.starttlsversion)
 						} else {
-							InfoLogger.Println("STARTTLS - TLS Version: " + orresult.starttlsversion)
+							printInfo("TLS Version", orresult.starttlsversion)
 						}
 					} else {
-						InfoLogger.Println(Cyan("STARTTLS not supported"))
+						printWarn("STARTTLS not supported")
 					}
 
 					if orresult.starttlsbool && orresult.starttlsvalid {
 						singlemx.tlscertvalid = true
-						InfoLogger.Println(Green("Certificate is valid"))
+						printOK("Certificate is valid")
+					}
+					if orresult.starttlsbool && !orresult.starttlsvalid {
+						printFail("Certificate not valid")
 					}
 
-					if orresult.starttlsbool && !orresult.starttlsvalid {
-						InfoLogger.Println(Red("Certificate not valid"))
-					}
 					// VRFY test
-					InfoLogger.Println("== Checking for VRFY support ==")
+					printSection("VRFY")
 					singlemx.vrfysupport = orresult.vrfybool
 					if orresult.vrfybool {
-						InfoLogger.Println(Red("VRFY command supported."))
+						printFail("VRFY command supported")
 					} else {
-						InfoLogger.Println(Green("VRFY command not supported."))
+						printOK("VRFY command not supported")
 					}
-
 				}
-				// TLS test
+
+				// TLS/SMTPS test
 				if port == "465" {
-					InfoLogger.Println("== Checking for TLS support on port " + port + " ==")
+					printSection("SMTPS Port " + port)
 					certinfo, err := tlsCheck(targetHost, port)
 					if err != nil {
-						InfoLogger.Println(err)
+						printError(err.Error())
 					}
 					orresult.tlsbool = certinfo.tlsok
 					orresult.tlsvalid = certinfo.certvalid
@@ -472,43 +447,42 @@ func main() {
 					singlemx.tlscertissuercn = certinfo.issuerCN
 					singlemx.tlscertsans = certinfo.sans
 					if orresult.tlsbool {
-						InfoLogger.Println(Green("SMTPS supported"))
+						printOK("SMTPS supported")
 						if orresult.tlsvalid {
-							InfoLogger.Println(Green("SMTPS TLS certificate valid"))
+							printOK("TLS certificate valid")
 						} else {
-							InfoLogger.Println(Yellow("SMTPS TLS certificate not valid"))
+							printWarn("TLS certificate not valid")
 						}
 						if orresult.tlsversion == "TLS 1.3" || orresult.tlsversion == "TLS 1.2" {
-							InfoLogger.Println(Green("SMTPS TLS Version: " + orresult.tlsversion))
+							printOK("TLS Version: " + orresult.tlsversion)
 						} else if orresult.tlsversion == "TLS 1.1" {
-							InfoLogger.Println(Yellow("SMTPS TLS Version: " + orresult.tlsversion))
+							printWarn("TLS Version: " + orresult.tlsversion)
 						} else {
-							InfoLogger.Println("SMTPS TLS Version: " + orresult.tlsversion)
+							printInfo("TLS Version", orresult.tlsversion)
 						}
 						if !certinfo.expiry.IsZero() {
-							InfoLogger.Println("SMTPS Cert Expiry:     " + certinfo.expiry.Format(time.RFC3339))
-							InfoLogger.Println("SMTPS Cert Subject CN: " + certinfo.subjectCN)
-							InfoLogger.Println("SMTPS Cert Issuer CN:  " + certinfo.issuerCN)
-							InfoLogger.Println("SMTPS Cert SANs:       " + strings.Join(certinfo.sans, ", "))
+							printInfo("Cert Expiry", certinfo.expiry.Format(time.RFC3339))
+							printInfo("Cert Subject CN", certinfo.subjectCN)
+							printInfo("Cert Issuer CN", certinfo.issuerCN)
+							printInfo("Cert SANs", strings.Join(certinfo.sans, ", "))
 						}
 					} else {
-						InfoLogger.Println(Cyan("SMTPS not supported"))
+						printWarn("SMTPS not supported")
 					}
 				}
 			}
 			runresult.mxresults = append(runresult.mxresults, singlemx)
-			println()
 		}
 	}
 
 	// Output to tsv file
 	if *writetsv {
-		InfoLogger.Println("Writing report to file")
+		printInfoRaw("Writing report to file")
 		err := writeTSV(*targetHostName, runresult, *blacklist)
 		if err != nil {
-			ErrorLogger.Printf("%s", err.Error())
+			printError(err.Error())
 		}
-
 	}
-	InfoLogger.Println("Test finished.")
+	fmt.Println()
+	printOK("Test finished.")
 }

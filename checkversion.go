@@ -24,11 +24,11 @@ func getLatestVersion() error {
 	}
 
 	if mxcv.Tag_name == Version {
-		InfoLogger.Println("You have the most recent version installed. Version: " + Version)
+		printOK("You have the most recent version installed. Version: " + Version)
 	} else {
-		InfoLogger.Println("A newer version is available.")
-		InfoLogger.Println("Installed version: " + Version)
-		InfoLogger.Println("Available version: " + mxcv.Tag_name)
+		printWarn("A newer version is available.")
+		printInfo("Installed version", Version)
+		printInfo("Available version", mxcv.Tag_name)
 	}
 
 	return nil
