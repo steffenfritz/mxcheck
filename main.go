@@ -58,6 +58,7 @@ type mxresult struct {
 	smtps            bool
 	openrelay        bool
 	vrfysupport      bool
+	eicardelivered   bool
 	smugglevuln      bool
 	smuggleresp      string
 	smuggleerror     string
@@ -65,6 +66,7 @@ type mxresult struct {
 
 func main() {
 	blacklist := flag.BoolP("blacklist", "b", false, "Check if the service is on blacklists")
+	eicar := flag.BoolP("eicar", "e", false, "Send EICAR test file to check AV filtering (use only on servers you are authorized to test)")
 	dkimSelector := flag.StringP("dkim-selector", "S", "",
 		"The DKIM selector. If set a DKIM check is performed on the provided service domain")
 	dnsServer := flag.StringP("dnsserver", "d", "8.8.8.8", "The dns server to be requested")
@@ -394,6 +396,23 @@ func main() {
 						printFail("Server is probably an open relay")
 					} else {
 						printOK("Server is not an open relay")
+					}
+
+					// EICAR test
+					if *eicar {
+						printSection("EICAR AV Test")
+						er, err := sendEICAR(*mailFrom, *mailTo, targetHost, port)
+						if err != nil {
+							printError(err.Error())
+						} else if er.sent {
+							singlemx.eicardelivered = true
+							printInfo("EICAR test file", "accepted by server")
+						} else {
+							printInfo("EICAR test file", "rejected by server")
+							if len(er.result) > 0 {
+								printInfo("Response", er.result)
+							}
+						}
 					}
 
 					// STARTTLS test
