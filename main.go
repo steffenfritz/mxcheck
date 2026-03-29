@@ -39,6 +39,10 @@ type mxresult struct {
 	ipaddr           string
 	asnum            int
 	ascountry        string
+	asname           string
+	asbgpprefix      string
+	asregistry       string
+	asallocated      string
 	ptrentry         string
 	ptrmatch         bool
 	serverstring     string
@@ -262,8 +266,16 @@ func main() {
 		} else {
 			singlemx.asnum = int(asn.ASNum)
 			singlemx.ascountry = asn.Country
+			singlemx.asname = asn.ASName
+			singlemx.asbgpprefix = asn.BGPPrefix
+			singlemx.asregistry = asn.Registry
+			singlemx.asallocated = asn.Allocated
 			printInfo("AS Number", strconv.Itoa(singlemx.asnum))
+			printInfo("AS Name", singlemx.asname)
 			printInfo("AS Country", singlemx.ascountry)
+			printInfo("AS Registry", singlemx.asregistry)
+			printInfo("AS Allocated", singlemx.asallocated)
+			printInfo("BGP Prefix", singlemx.asbgpprefix)
 		}
 
 		// PTR lookup
