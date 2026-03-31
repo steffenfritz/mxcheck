@@ -61,6 +61,7 @@ type mxresult struct {
 	smugglevuln      bool
 	smuggleresp      string
 	smuggleerror     string
+	danerecords      []dane
 }
 
 func main() {
@@ -278,6 +279,24 @@ func main() {
 			printOK("PTR matches MX record")
 		} else {
 			printFail("PTR does not match MX record")
+		}
+
+		// DANE/TLSA lookup
+		printSection("DANE")
+		danerecords, err := getDANE(targetHost, *dnsServer)
+		if err != nil {
+			printError(err.Error())
+		} else if len(danerecords) == 0 {
+			printWarn("No DANE/TLSA records found")
+		} else {
+			singlemx.danerecords = danerecords
+			printOK("DANE/TLSA set")
+			for _, d := range danerecords {
+				printInfo("Usage", d.usageName)
+				printInfo("Selector", d.selectorName)
+				printInfo("Matching Type", d.matchingName)
+				printInfo("Certificate Data", d.certificate)
+			}
 		}
 
 		// SPF lookup

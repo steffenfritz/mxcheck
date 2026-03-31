@@ -336,6 +336,70 @@ func getTLSRPT(targetHostName string, dnsServer string) (tlsrpt, error) {
 	return result, nil
 }
 
+// getDANE queries TLSA records for _25._tcp.<mxhost> (RFC 6698, RFC 7672).
+// It returns a slice of dane (one per TLSA record) and an error.
+func getDANE(mxhost string, dnsServer string) ([]dane, error) {
+	var results []dane
+
+	usageNames := map[uint8]string{
+		0: "PKIX-TA",
+		1: "PKIX-EE",
+		2: "DANE-TA",
+		3: "DANE-EE",
+	}
+	selectorNames := map[uint8]string{
+		0: "Cert",
+		1: "SPKI",
+	}
+	matchingNames := map[uint8]string{
+		0: "Full",
+		1: "SHA2-256",
+		2: "SHA2-512",
+	}
+
+	tlsaName := "_25._tcp." + mxhost
+
+	m := new(dns.Msg)
+	m.SetQuestion(dns.Fqdn(tlsaName), dns.TypeTLSA)
+
+	c := new(dns.Client)
+	in, _, err := c.Exchange(m, dnsServer+":53")
+	if err != nil {
+		return results, err
+	}
+
+	for _, rr := range in.Answer {
+		if t, ok := rr.(*dns.TLSA); ok {
+			d := dane{
+				daneset:      true,
+				mxhost:       mxhost,
+				usage:        t.Usage,
+				selector:     t.Selector,
+				matchingType: t.MatchingType,
+				certificate:  t.Certificate,
+			}
+			if name, found := usageNames[t.Usage]; found {
+				d.usageName = name
+			} else {
+				d.usageName = "Unknown"
+			}
+			if name, found := selectorNames[t.Selector]; found {
+				d.selectorName = name
+			} else {
+				d.selectorName = "Unknown"
+			}
+			if name, found := matchingNames[t.MatchingType]; found {
+				d.matchingName = name
+			} else {
+				d.matchingName = "Unknown"
+			}
+			results = append(results, d)
+		}
+	}
+
+	return results, nil
+}
+
 // getBIMI builds a TXT request for default._bimi.<domain>
 // and sends it to a dns server.
 // It returns type bimi and an error.
