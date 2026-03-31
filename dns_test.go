@@ -176,6 +176,28 @@ func Test_getPTR(t *testing.T) {
 	}
 }
 
+func Test_getDANE(t *testing.T) {
+	type args struct {
+		mxhost    string
+		dnsServer string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"DANE no record", args{"mail.fritz.wtf.", "8.8.8.8"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := getDANE(tt.args.mxhost, tt.args.dnsServer)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("getDANE() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
 func Test_getSPF(t *testing.T) {
 	type args struct {
 		targetHostName string
