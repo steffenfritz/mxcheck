@@ -151,7 +151,19 @@ func writeTSV(targetHostName string, runresult runresult, blacklist bool) error 
 		if err = tsv.Write([]string{"AS Number", strconv.Itoa(mxentry.asnum)}); err != nil {
 			return err
 		}
+		if err = tsv.Write([]string{"AS Name", mxentry.asname}); err != nil {
+			return err
+		}
 		if err = tsv.Write([]string{"AS Country", mxentry.ascountry}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"AS Registry", mxentry.asregistry}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"AS Allocated", mxentry.asallocated}); err != nil {
+			return err
+		}
+		if err = tsv.Write([]string{"BGP Prefix", mxentry.asbgpprefix}); err != nil {
 			return err
 		}
 		if err = tsv.Write([]string{"Server string", mxentry.serverstring}); err != nil {
