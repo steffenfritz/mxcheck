@@ -130,9 +130,17 @@ jobs:
           TAG: ${{ steps.version.outputs.tag }}
           VERSION: ${{ steps.version.outputs.value }}
         run: |
-          gh release create "$TAG" \
-            --repo "$GITHUB_REPOSITORY" \
-            --title "mxcheck $VERSION" \
-            --generate-notes \
-            dist/*.deb \
-            dist/*.tar.gz
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release upload "$TAG" \
+              --repo "$GITHUB_REPOSITORY" \
+              --clobber \
+              dist/*.deb \
+              dist/*.tar.gz
+          else
+            gh release create "$TAG" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "mxcheck $VERSION" \
+              --generate-notes \
+              dist/*.deb \
+              dist/*.tar.gz
+          fi
