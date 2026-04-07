@@ -1,0 +1,19 @@
+name: mxcheck
+arch: ${ARCH}
+platform: linux
+version: ${VERSION}
+section: net
+priority: optional
+maintainer: Steffen Fritz <steffen@fritz.wtf>
+description: |
+  Mail server security scanner.
+  mxcheck checks MX records, TLS, STARTTLS, DKIM, DMARC, SPF, DANE/TLSA,
+  open relay status, DNSBL listings, ASN info and more.
+homepage: https://github.com/steffenfritz/mxcheck
+license: GPL-3.0
+
+contents:
+  - src: ./mxcheck
+    dst: /usr/bin/mxcheck
+    file_info:
+      mode: 0755
