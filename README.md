@@ -26,6 +26,7 @@ You can set mailFrom, mailTo, the DNS server, DKIM selector and output a report 
     -n, --no-prompt          Answer yes to all questions
     -s, --service string     The service host to check (mandatory flag)
     -S, --dkim-selector      The DKIM selector. If set a dkim check is performed on the provided service domain
+    -V, --verbose            Show timestamps in output
     -v, --version            Version and license
     -u, --updatecheck        Check if a new version of mxcheck is available
     -w, --write-tsv          Write tsv formated report to file
@@ -34,7 +35,7 @@ You can set mailFrom, mailTo, the DNS server, DKIM selector and output a report 
 
 # Version
 
-v1.8.0
+v2.0.0
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/steffenfritz/mxcheck)](https://goreportcard.com/report/github.com/steffenfritz/mxcheck) 
 [![Go Reference](https://pkg.go.dev/badge/github.com/steffenfritz/mxcheck.svg)](https://pkg.go.dev/github.com/steffenfritz/mxcheck)
@@ -48,7 +49,7 @@ v1.8.0
 
 # Installation
 
-    go install github.com/steffenfritz/mxcheck@v1.8.0
+    go install github.com/steffenfritz/mxcheck@v2.0.0
     
 or
 

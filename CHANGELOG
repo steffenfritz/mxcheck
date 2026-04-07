@@ -1,3 +1,57 @@
+20260301
+
+  Version: v1.9.0
+  Notes:
+    Email authentication and TLS inspection release.
+
+    Features added:
+      - TLSRPT record check
+      - BIMI record check
+      - Full DMARC parsing
+      - TLS certificate details per MX host
+      - Improved CLI output with structured formatting and --verbose flag
+    Bug fixes:
+      - Multiple bugs fixed following code review
+
+20240901
+
+  Version: v1.8.0
+  Notes:
+    SMTP smuggling detection and dependency maintenance release.
+
+    Features added:
+      - SMTP smuggling detection (--smuggle flag, closes #26)
+    Maintenance:
+      - Updated all dependencies (#66)
+
+20240701
+
+  Version: v1.7.0
+  Notes:
+    Port scan control and stability improvements.
+
+    Features added:
+      - -p flag to disable port scan (#58)
+    Bug fixes:
+      - Fix DNS type assertion in request builders (#54)
+    Maintenance:
+      - Updated modules and dependencies
+      - Added OSSF Scorecard workflow
+      - Bump golang.org/x/net to 0.38.0 (security)
+
+20240624
+
+  Version: v1.6.2
+  Notes:
+    Dependency and build maintenance release.
+
+    Security:
+      - Updated all dependencies, fixing non-linear parsing vulnerability in golang.org/x/net/html (#47)
+    Maintenance:
+      - Optimized Makefile (#45)
+      - Removed test files incompatible with GitHub Actions limitations (#43)
+      - Added OpenSSF patches: test files, build workflow, CHANGELOG, CODEOWNERS (#38)
+
 20240624
   
   Version: v1.6.1

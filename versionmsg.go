@@ -1,12 +1,12 @@
 package main
 
 // Version is used by the Makefile to set the version
-var Version string = "v1.8.0"
+var Version string = "v2.0.0"
 
 // Build is used by the Makefile to set the build, i.e. short git fingerprint
 // var Build string
 
-var info = "mxcheck --  Copyright (C) 2019-2025  Steffen Fritz"
+var info = "mxcheck --  Copyright (C) 2019-2026  Steffen Fritz"
 
 var license = `This program comes with ABSOLUTELY NO WARRANTY.
 This is free software under GPL-3.0, and you are welcome to 
