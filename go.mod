@@ -16,6 +16,6 @@ require (
 	golang.org/x/mod v0.34.0 // indirect
 	golang.org/x/net v0.52.0 // indirect; manual update due to a security issue in older versions
 	// golang.org/x/net v0.17.0 // indirect
-	golang.org/x/sys v0.42.0 // indirect
+	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/tools v0.43.0 // indirect
 )
