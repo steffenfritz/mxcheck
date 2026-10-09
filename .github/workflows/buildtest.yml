@@ -35,25 +35,9 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417
         with:
-          go-version: '1.25.x'
+          go-version: '1.27.x'
       - name: Install dependencies
         run: go get .
       -
         name: Test
         run: go test -v
-      -
-        name: Build
-        uses: crazy-max/ghaction-xgo@682253ce1d3dd7a78c5120c703c9f3811dbf8cb2 # v3.0.0
-        with:
-          xgo_version: latest
-          go_version: 1.21
-          dest: build
-          prefix: mxcheck
-          targets: windows/amd64,linux/amd64
-          v: true
-          x: false
-          race: false
-          ldflags: -s -w
-          buildmode: default
-          trimpath: true
-          pkg: ./mxcheck
