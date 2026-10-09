@@ -60,7 +60,7 @@ func checkdnsblName(domainname string, dnsServer string) (map[string]string, map
 
 		c := new(dns.Client)
 
-		in, _, err := c.Exchange(m, dnsServer+":53")
+		in, _, err := exchangeWithRetry(c, m, dnsServer+":53")
 		if err != nil {
 			printError(err.Error())
 			continue

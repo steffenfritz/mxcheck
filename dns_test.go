@@ -1,8 +1,11 @@
 package main
 
 import (
+	"net"
 	"reflect"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/miekg/dns"
 )
@@ -220,6 +223,61 @@ func Test_getSPF(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("getSPF() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+// startDropServer starts a local UDP DNS server that silently drops the first
+// drop queries and answers all later ones. It returns the server address and
+// a counter of received queries.
+func startDropServer(t *testing.T, drop int32) (string, *int32) {
+	t.Helper()
+	pc, err := net.ListenPacket("udp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("ListenPacket() error = %v", err)
+	}
+	var count int32
+	srv := &dns.Server{
+		PacketConn: pc,
+		Handler: dns.HandlerFunc(func(w dns.ResponseWriter, r *dns.Msg) {
+			if atomic.AddInt32(&count, 1) <= drop {
+				return
+			}
+			m := new(dns.Msg)
+			m.SetReply(r)
+			w.WriteMsg(m)
+		}),
+	}
+	go srv.ActivateAndServe()
+	t.Cleanup(func() { srv.Shutdown() })
+	return pc.LocalAddr().String(), &count
+}
+
+func Test_exchangeWithRetry(t *testing.T) {
+	tests := []struct {
+		name      string
+		drop      int32
+		wantErr   bool
+		wantCount int32
+	}{
+		{"answer on first try", 0, false, 1},
+		{"answer after one timeout", 1, false, 2},
+		{"all attempts time out", dnsRetries, true, dnsRetries},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			addr, count := startDropServer(t, tt.drop)
+			m := new(dns.Msg)
+			m.SetQuestion("example.org.", dns.TypeA)
+			c := &dns.Client{Timeout: 200 * time.Millisecond}
+
+			_, _, err := exchangeWithRetry(c, m, addr)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("exchangeWithRetry() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if got := atomic.LoadInt32(count); got != tt.wantCount {
+				t.Errorf("exchangeWithRetry() queries = %d, want %d", got, tt.wantCount)
 			}
 		})
 	}
