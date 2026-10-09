@@ -2,10 +2,34 @@ package main
 
 import (
 	"errors"
+	"net"
 	"strings"
+	"time"
 
 	"github.com/miekg/dns"
 )
+
+// dnsRetries is the number of attempts made for a DNS query before giving up.
+const dnsRetries = 3
+
+// exchangeWithRetry sends m to addr using c and retries on timeouts, since a
+// single lost UDP packet or a slow upstream resolver would otherwise fail the
+// whole lookup.
+func exchangeWithRetry(c *dns.Client, m *dns.Msg, addr string) (*dns.Msg, time.Duration, error) {
+	var (
+		in  *dns.Msg
+		rtt time.Duration
+		err error
+	)
+	for i := 0; i < dnsRetries; i++ {
+		in, rtt, err = c.Exchange(m, addr)
+		var netErr net.Error
+		if err == nil || !errors.As(err, &netErr) || !netErr.Timeout() {
+			break
+		}
+	}
+	return in, rtt, err
+}
 
 // getMX builds an MX record dns request and sends it to a dns server
 // It returns a mx entry list, if at least one mx record was found and an error
@@ -18,7 +42,7 @@ func getMX(targetHostName *string, dnsServer string) ([]string, bool, error) {
 	m.SetQuestion(dns.Fqdn(*targetHostName), dns.TypeMX)
 
 	c := new(dns.Client)
-	in, _, err := c.Exchange(m, dnsServer+":53")
+	in, _, err := exchangeWithRetry(c, m, dnsServer+":53")
 	if err != nil {
 		return mxlist, mxstatus, err
 	}
@@ -49,7 +73,7 @@ func getA(targetHostName string, dnsServer string) (string, error) {
 	m.SetQuestion(targetHostName, dns.TypeA)
 
 	c := new(dns.Client)
-	in, _, err := c.Exchange(m, dnsServer+":53")
+	in, _, err := exchangeWithRetry(c, m, dnsServer+":53")
 	if err != nil {
 		return a, err
 	}
@@ -85,7 +109,7 @@ func getPTR(ipaddr string, dnsServer string) (string, error) {
 	m.SetQuestion(dns.Fqdn(rddapi), dns.TypePTR)
 
 	c := new(dns.Client)
-	in, _, err := c.Exchange(m, dnsServer+":53")
+	in, _, err := exchangeWithRetry(c, m, dnsServer+":53")
 	if err != nil {
 		return ptr, err
 	}
@@ -112,7 +136,7 @@ func getSPF(targetHostName string, dnsServer string) (bool, string, error) {
 
 	c := new(dns.Client)
 	c.Net = "tcp"
-	in, _, err := c.Exchange(m, dnsServer+":53")
+	in, _, err := exchangeWithRetry(c, m, dnsServer+":53")
 	if err != nil {
 		return spf, spfanswer, err
 	}
@@ -145,7 +169,7 @@ func getMTASTS(targetHostName string, dnsServer string) (bool, error) {
 
 	c := new(dns.Client)
 	c.Net = "tcp"
-	in, _, err := c.Exchange(m, dnsServer+":53")
+	in, _, err := exchangeWithRetry(c, m, dnsServer+":53")
 	if err != nil {
 		return mtasts, err
 	}
@@ -178,7 +202,7 @@ func getDKIM(selector string, targetHostName string, dnsServer string) (dkim, er
 
 	c := new(dns.Client)
 	c.Net = "tcp"
-	in, _, err := c.Exchange(m, dnsServer+":53")
+	in, _, err := exchangeWithRetry(c, m, dnsServer+":53")
 	if err != nil {
 		return dkim, err
 	}
@@ -239,7 +263,7 @@ func getDMARC(targetHostName string, dnsServer string) (dmarc, error) {
 
 	c := new(dns.Client)
 	c.Net = "tcp"
-	in, _, err := c.Exchange(m, dnsServer+":53")
+	in, _, err := exchangeWithRetry(c, m, dnsServer+":53")
 	if err != nil {
 		return dmarc, err
 	}
@@ -302,7 +326,7 @@ func getTLSRPT(targetHostName string, dnsServer string) (tlsrpt, error) {
 
 	c := new(dns.Client)
 	c.Net = "tcp"
-	in, _, err := c.Exchange(m, dnsServer+":53")
+	in, _, err := exchangeWithRetry(c, m, dnsServer+":53")
 	if err != nil {
 		return result, err
 	}
@@ -363,7 +387,7 @@ func getDANE(mxhost string, dnsServer string) ([]dane, error) {
 	m.SetQuestion(dns.Fqdn(tlsaName), dns.TypeTLSA)
 
 	c := new(dns.Client)
-	in, _, err := c.Exchange(m, dnsServer+":53")
+	in, _, err := exchangeWithRetry(c, m, dnsServer+":53")
 	if err != nil {
 		return results, err
 	}
@@ -411,7 +435,7 @@ func getBIMI(targetHostName string, dnsServer string) (bimi, error) {
 
 	c := new(dns.Client)
 	c.Net = "tcp"
-	in, _, err := c.Exchange(m, dnsServer+":53")
+	in, _, err := exchangeWithRetry(c, m, dnsServer+":53")
 	if err != nil {
 		return result, err
 	}
