@@ -1,4 +1,4 @@
-module github.com/steffenfritz/mxcheck
+module github.com/steffenfritz/mxcheck/v2
 
 go 1.25.0
 
